@@ -1,0 +1,67 @@
+{{-- ─── Sidebar Owner Navigation (§3.5) ─────────────────────────
+     Menu: Beranda, Kelola Lapangan, Kelola Jadwal, Verifikasi Booking,
+           Komunitas, Profil Usaha
+─────────────────────────────────────────────────────────────── --}}
+
+@php $current = request()->route()->getName() ?? ''; @endphp
+
+<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px;">
+
+    {{-- Beranda --}}
+    <li>
+        <a href="/owner/dashboard"
+           class="sidebar-link {{ str_starts_with($current, 'owner.dashboard') ? 'active' : '' }}">
+            <i data-lucide="layout-dashboard" style="width:17px;height:17px;flex-shrink:0;"></i>
+            <span>Beranda</span>
+        </a>
+    </li>
+
+    {{-- Kelola Lapangan --}}
+    <li>
+        <a href="/owner/fields"
+           class="sidebar-link {{ str_starts_with($current, 'owner.fields') ? 'active' : '' }}">
+            <i data-lucide="map-pin" style="width:17px;height:17px;flex-shrink:0;"></i>
+            <span>Kelola Lapangan</span>
+        </a>
+    </li>
+
+    {{-- Kelola Jadwal & Slot --}}
+    <li>
+        <a href="/owner/schedules"
+           class="sidebar-link {{ str_starts_with($current, 'owner.schedules') ? 'active' : '' }}">
+            <i data-lucide="calendar-days" style="width:17px;height:17px;flex-shrink:0;"></i>
+            <span>Kelola Jadwal & Slot</span>
+        </a>
+    </li>
+
+    {{-- Verifikasi Booking --}}
+    <li>
+        <a href="/owner/verify-booking"
+           class="sidebar-link {{ str_starts_with($current, 'owner.verify') ? 'active' : '' }}"
+           style="position:relative;">
+            <i data-lucide="shield-check" style="width:17px;height:17px;flex-shrink:0;"></i>
+            <span>Verifikasi Booking</span>
+            {{-- Badge notif --}}
+            <span style="margin-left:auto;background:#EA580C;color:#fff;font-size:0.6875rem;font-weight:700;
+                         padding:1px 7px;border-radius:10px;">4</span>
+        </a>
+    </li>
+
+    {{-- Komunitas --}}
+    <li>
+        <a href="/player/community"
+           class="sidebar-link {{ str_starts_with($current, 'player.community') ? 'active' : '' }}">
+            <i data-lucide="message-circle" style="width:17px;height:17px;flex-shrink:0;"></i>
+            <span>Komunitas</span>
+        </a>
+    </li>
+
+    {{-- Profil Usaha --}}
+    <li>
+        <a href="/owner/profile"
+           class="sidebar-link {{ str_starts_with($current, 'owner.profile') ? 'active' : '' }}">
+            <i data-lucide="building-2" style="width:17px;height:17px;flex-shrink:0;"></i>
+            <span>Profil Usaha</span>
+        </a>
+    </li>
+</ul>
