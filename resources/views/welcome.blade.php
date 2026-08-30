@@ -11,15 +11,7 @@
 @include('components.navbar')
 
 @php
-/* Dummy data lapangan populer */
-$popularFields = [
-    ['name'=>'Futsal Planet Pekalongan',  'sport'=>'Futsal',      'type'=>'Indoor',  'location'=>'Pekalongan Barat', 'price'=>'90.000',  'rating'=>4.8, 'reviewCount'=>41, 'href'=>'/player/booking/1'],
-    ['name'=>'GOR Bulu Tangkis Arinda',   'sport'=>'Bulu Tangkis','type'=>'Indoor',  'location'=>'Pekalongan Timur','price'=>'55.000',  'rating'=>4.6, 'reviewCount'=>28, 'href'=>'/player/booking/2'],
-    ['name'=>'Lapangan Basket Pemuda',    'sport'=>'Basket',      'type'=>'Outdoor', 'location'=>'Kota Pekalongan', 'price'=>'75.000',  'rating'=>4.5, 'reviewCount'=>17, 'href'=>'/player/booking/3'],
-    ['name'=>'Tenis Indoor Batik City',   'sport'=>'Tenis',       'type'=>'Indoor',  'location'=>'Pekalongan Selatan','price'=>'110.000','rating'=>4.7,'reviewCount'=>33, 'href'=>'/player/booking/4'],
-    ['name'=>'Padel Court Pekalongan',    'sport'=>'Padel',       'type'=>'Indoor',  'location'=>'Pekalongan Utara', 'price'=>'130.000', 'rating'=>4.9, 'reviewCount'=>12, 'href'=>'/player/booking/5'],
-    ['name'=>'Mini Soccer Arena',         'sport'=>'Mini Soccer', 'type'=>'Outdoor', 'location'=>'Pekalongan Barat', 'price'=>'85.000',  'rating'=>4.4, 'reviewCount'=>22, 'href'=>'/player/booking/6'],
-];
+// $popularFields is passed from route controller
 @endphp
 
 {{-- ═══════════════════════════════════════════════════════════
@@ -40,7 +32,7 @@ $popularFields = [
                 border:1px solid rgba(22,163,74,0.1);border-radius:50%;pointer-events:none;"></div>
 
     <div style="max-width:1280px;margin:0 auto;padding:80px 24px 120px;width:100%;position:relative;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;" class="hero-grid">
 
             {{-- Left: Copy --}}
             <div>
@@ -64,11 +56,11 @@ $popularFields = [
                 </p>
 
                 {{-- Quick search bar --}}
-                <form action="/player/booking" method="GET"
+                <form action="/player/booking" method="GET" class="hero-search-form"
                       style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
                              border-radius:8px;padding:6px;display:flex;gap:6px;margin-bottom:28px;
-                             max-width:520px;">
-                    <select name="sport" style="flex:1;background:transparent;border:none;outline:none;
+                             max-width:520px;flex-wrap:wrap;">
+                    <select name="sport" style="flex:1;min-width:120px;background:transparent;border:none;outline:none;
                                 color:#fff;font-size:0.875rem;padding:8px 10px;cursor:pointer;
                                 font-family:'Inter',sans-serif;">
                         <option value="" style="background:#1E293B;">Semua Olahraga</option>
@@ -79,12 +71,10 @@ $popularFields = [
                         <option value="padel"        style="background:#1E293B;">Padel</option>
                         <option value="minisoccer"   style="background:#1E293B;">Mini Soccer</option>
                     </select>
-                    <div style="width:1px;background:rgba(255,255,255,0.15);"></div>
                     <input type="text" name="location" placeholder="Lokasi / Kecamatan"
-                           style="flex:1.2;background:transparent;border:none;outline:none;
+                           style="flex:1.2;min-width:120px;background:transparent;border:none;outline:none;
                                   color:#fff;font-size:0.875rem;padding:8px 10px;
-                                  font-family:'Inter',sans-serif;"
-                           placeholder="Lokasi / Kecamatan">
+                                  font-family:'Inter',sans-serif;">
                     <button type="submit" class="btn-brand" style="border-radius:6px;white-space:nowrap;">
                         <i data-lucide="search" style="width:15px;height:15px;"></i>
                         Cari Lapangan
@@ -92,7 +82,7 @@ $popularFields = [
                 </form>
 
                 {{-- Stats --}}
-                <div style="display:flex;gap:32px;">
+                <div style="display:flex;gap:24px;flex-wrap:wrap;">
                     <div>
                         <div style="font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;">42+</div>
                         <div style="font-size:0.8125rem;color:#86EFAC;">Lapangan Terdaftar</div>
@@ -111,7 +101,7 @@ $popularFields = [
             </div>
 
             {{-- Right: Floating card illustration --}}
-            <div style="display:flex;flex-direction:column;gap:14px;position:relative;">
+            <div class="hero-right" style="display:flex;flex-direction:column;gap:14px;position:relative;">
 
                 {{-- Main card --}}
                 <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
@@ -197,7 +187,7 @@ $popularFields = [
         </div>
 
         {{-- Grid Card 3 kolom (§3.6) --}}
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;" class="grid-responsive-3">
             @foreach($popularFields as $field)
                 <x-field-card
                     :name="$field['name']"
@@ -239,7 +229,7 @@ $popularFields = [
         ];
         @endphp
 
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;" class="grid-responsive-3">
             @foreach($features as $f)
             <div class="card" style="padding:28px;border-radius:12px;">
                 <div style="width:52px;height:52px;background:{{ $f['color'] }}15;border-radius:10px;
@@ -261,7 +251,7 @@ $popularFields = [
 <section id="komunitas" style="padding:80px 0;background:#F8FAFC;">
     <div style="max-width:1280px;margin:0 auto;padding:0 24px;">
 
-        <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:36px;flex-wrap:wrap;gap:16px;">
             <div>
                 <div style="font-size:0.8125rem;font-weight:600;color:#16A34A;letter-spacing:0.05em;margin-bottom:6px;">KOMUNITAS</div>
                 <h2 class="section-title" style="font-size:1.75rem;">7 Ruang Komunitas Olahraga</h2>
@@ -285,7 +275,7 @@ $popularFields = [
         ];
         @endphp
 
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;" class="grid-responsive-4">
             @foreach($communities as $com)
             <a href="/register" style="text-decoration:none;">
                 <div class="card" style="padding:20px;display:flex;align-items:center;gap:14px;
@@ -318,7 +308,7 @@ $popularFields = [
         <p style="color:#86EFAC;font-size:1rem;margin:0 0 36px;">
             Bergabung dengan ribuan pemuda Pekalongan yang sudah menggunakan SPORTA.
         </p>
-        <div style="display:flex;gap:12px;justify-content:center;">
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
             <a href="/register" class="btn-brand" style="padding:13px 28px;font-size:1rem;">
                 Daftar Gratis Sekarang
                 <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
@@ -347,7 +337,7 @@ $popularFields = [
             </p>
         </div>
         <div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:20px;
-                    display:flex;align-items:center;justify-content:space-between;">
+                    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <p style="font-size:0.8rem;color:#475569;margin:0;">© 2026 SPORTA. Karya Putra-Putri Kota Pekalongan.</p>
             <div style="display:flex;gap:20px;">
                 <a href="#" style="font-size:0.8rem;color:#475569;text-decoration:none;">Tentang</a>
@@ -358,22 +348,86 @@ $popularFields = [
     </div>
 </footer>
 
-{{-- Responsive styles --}}
+{{-- Responsive styles untuk landing page --}}
 <style>
+/* ── Tablet: hero satu kolom, ilustrasi kanan disembunyikan ── */
 @media (max-width: 1024px) {
     .hero-right { display: none !important; }
+    .hero-grid {
+        grid-template-columns: 1fr !important;
+        gap: 32px !important;
+    }
 }
+
+/* ── Mobile (≤768px) ── */
 @media (max-width: 768px) {
-    section > div > div[style*="grid-template-columns:repeat(3"] {
-        grid-template-columns: 1fr 1fr !important;
+    /* Hero section padding */
+    .hero-bg section, .hero-bg > div > div:first-child {
+        padding-top: 56px !important;
+        padding-bottom: 72px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
     }
-    section > div > div[style*="grid-template-columns:repeat(4"] {
-        grid-template-columns: 1fr 1fr !important;
+
+    /* Hero H1 ukuran */
+    .hero-grid > div > h1 {
+        font-size: 2rem !important;
     }
-    section > div > div[style*="grid-template-columns:1fr 1fr"] {
+
+    /* Search form: satu kolom */
+    .hero-search-form {
+        flex-direction: column !important;
+        max-width: 100% !important;
+    }
+    .hero-search-form > select,
+    .hero-search-form > input {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    .hero-search-form > button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* Sections padding */
+    section { padding-top: 48px !important; padding-bottom: 48px !important; }
+    section > div { padding-left: 16px !important; padding-right: 16px !important; }
+
+    /* Grid 3 kolom → 1 kolom */
+    .grid-responsive-3 {
         grid-template-columns: 1fr !important;
     }
-    .nav-links { display: none !important; }
+
+    /* Grid 4 kolom → 2 kolom */
+    .grid-responsive-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Section header: stack vertikal */
+    #komunitas > div > div:first-child,
+    #lapangan-populer > div > div:first-child {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    /* Footer */
+    footer > div > div:first-child {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    footer > div > div:first-child > p {
+        text-align: left !important;
+    }
+}
+
+/* ── Small Mobile (≤480px) ── */
+@media (max-width: 480px) {
+    .grid-responsive-4 {
+        grid-template-columns: 1fr !important;
+    }
+    /* Section title ukuran */
+    .section-title { font-size: 1.25rem !important; }
 }
 </style>
 

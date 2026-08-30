@@ -11,18 +11,24 @@ use Illuminate\Support\Facades\Auth;
 
 class VerifikasiBookingController extends Controller
 {
-    /** Daftar booking yang menunggu verifikasi untuk lapangan milik Owner (FR-D2) */
-    public function index()
+    /** Daftar booking untuk lapangan milik Owner (bisa difilter by status) (FR-D2) */
+    public function index(Request $request)
     {
         $lapanganIds = Lapangan::where('owner_id', Auth::id())->pluck('id');
 
+        $status = $request->get('status', Booking::STATUS_MENUNGGU_VERIFIKASI);
+
         $bookings = Booking::with(['slot.lapangan', 'user', 'pembayaran'])
             ->whereHas('slot', fn($q) => $q->whereIn('lapangan_id', $lapanganIds))
-            ->where('status', Booking::STATUS_MENUNGGU_VERIFIKASI)
+            ->where('status', $status)
             ->latest()
             ->paginate(15);
 
-        return view('owner.verify-booking', compact('bookings'));
+        $pendingCount = Booking::whereHas('slot', fn($q) => $q->whereIn('lapangan_id', $lapanganIds))
+            ->where('status', Booking::STATUS_MENUNGGU_VERIFIKASI)
+            ->count();
+
+        return view('owner.verify-booking', compact('bookings', 'pendingCount', 'status'));
     }
 
     /** Setujui booking — status → terkonfirmasi (FR-D3) */

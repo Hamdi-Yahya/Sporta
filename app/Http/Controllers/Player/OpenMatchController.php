@@ -14,17 +14,43 @@ use Illuminate\Support\Facades\DB;
 class OpenMatchController extends Controller
 {
     /** Daftar slot Open Match yang tersedia lintas lapangan (FR-E1) */
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $slots = Slot::with('lapangan.cabangOlahraga')
+        $query = Slot::with('lapangan.cabangOlahraga')
             ->openMatch()
             ->where('status', 'tersedia')
-            ->where('tanggal', '>=', now()->toDateString())
-            ->orderBy('tanggal')
-            ->orderBy('jam_mulai')
-            ->paginate(12);
+            ->where('tanggal', '>=', now()->toDateString());
 
-        return view('player.open-match', compact('slots'));
+        // Filter: cabang olahraga
+        if ($request->filled('cabor_id')) {
+            $query->whereHas('lapangan', function ($q) use ($request) {
+                $q->where('cabor_id', $request->cabor_id);
+            });
+        }
+
+        // Filter: sembunyikan yang penuh
+        if ($request->boolean('sembunyikan_penuh')) {
+            $query->where('status', 'tersedia');
+        }
+
+        // Sort
+        $sort = $request->get('sort', 'tanggal');
+        if ($sort === 'kuota') {
+            // Slot yang hampir penuh di atas (kuota terisi desc)
+            $query->orderByDesc('kuota_terisi');
+        } elseif ($sort === 'harga_asc') {
+            $query->orderBy('harga');
+        } else {
+            // Default: tanggal terdekat
+            $query->orderBy('tanggal')->orderBy('jam_mulai');
+        }
+
+        $slots = $query->paginate(12);
+
+        // Ambil daftar cabor untuk dropdown filter
+        $caborList = \App\Models\CabangOlahraga::bookable()->get();
+
+        return view('player.open-match', compact('slots', 'caborList'));
     }
 
     /** Booking 1 kursi pada slot Open Match (FR-E2, FR-E3) */

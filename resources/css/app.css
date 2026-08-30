@@ -384,18 +384,157 @@ h1, h2, h3, h4, h5, h6 {
     gap: 16px;
 }
 
-/* Responsive: hide sidebar on mobile */
-@media (max-width: 768px) {
+/* ─── RESPONSIVE — Mobile-first approach ──────────────────── */
+
+/* ── Tablet (max 1024px) ─────────────────────────────────── */
+@media (max-width: 1024px) {
+    /* Dashboard: sidebar lebih sempit */
     .sidebar {
+        width: 220px;
+    }
+    .dashboard-content {
+        margin-left: 220px;
+    }
+
+    /* Dashboard content padding lebih kecil */
+    .stat-card {
+        padding: 16px 18px;
+    }
+}
+
+/* ── Mobile (max 768px) ──────────────────────────────────── */
+@media (max-width: 768px) {
+    /* ── Sidebar: hidden by default, slide-in on toggle ── */
+    .sidebar {
+        width: 260px;
         transform: translateX(-100%);
         transition: transform 0.25s ease;
+        z-index: 200;
     }
 
     .sidebar.open {
         transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.25);
     }
 
+    /* ── Dashboard content: full width ── */
     .dashboard-content {
         margin-left: 0;
     }
+
+    /* ── Topbar ── */
+    .topbar {
+        padding: 10px 16px;
+    }
+
+    /* ── Page content padding ── */
+    .page-content {
+        padding: 16px !important;
+    }
+
+    /* ── Stat cards: stack vertikal ── */
+    .stat-card {
+        padding: 14px 16px;
+    }
+
+    /* ── Card overflow ── */
+    .card {
+        overflow-x: auto;
+    }
+
+    /* ── Form inputs ── */
+    .form-input {
+        font-size: 1rem; /* Hindari auto-zoom di iOS */
+    }
+
+    /* ── Buttons ── */
+    .btn-brand,
+    .btn-outline {
+        padding: 10px 16px;
+    }
+
+    /* ── Chat bubbles: max-width lebih besar di mobile ── */
+    .chat-bubble-own,
+    .chat-bubble-other {
+        max-width: 88%;
+        font-size: 0.9375rem;
+    }
+
+    /* ── Badge: selalu 1 baris ── */
+    .badge {
+        white-space: nowrap;
+        font-size: 0.6875rem;
+    }
 }
+
+/* ── Small mobile (max 480px) ───────────────────────────── */
+@media (max-width: 480px) {
+    /* ── Topbar title ── */
+    .topbar {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    /* ── Button kecil ── */
+    .btn-sm {
+        padding: 7px 12px;
+        font-size: 0.8125rem;
+    }
+
+    /* ── Section title ── */
+    .section-title {
+        font-size: 1.125rem;
+    }
+}
+
+/* ── Overlay ketika sidebar mobile terbuka ─────────────── */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 199;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* ── Responsive Table (overflow scroll) ────────────────── */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ── Responsive Grid Utilities ──────────────────────────── */
+@media (max-width: 768px) {
+    .grid-responsive-2 {
+        grid-template-columns: 1fr !important;
+    }
+    .grid-responsive-3 {
+        grid-template-columns: 1fr !important;
+    }
+    .grid-responsive-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .gap-responsive {
+        gap: 12px !important;
+    }
+    /* Sembunyikan elemen yang tidak perlu di mobile */
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-responsive-4 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .hide-desktop {
+        display: none !important;
+    }
+}
+

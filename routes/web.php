@@ -24,7 +24,28 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 */
 
 /* ─── Public ────────────────────────────────────────────────── */
-Route::get('/', fn() => view('welcome'))->name('home');
+Route::get('/', function () {
+    $popularFields = \App\Models\Lapangan::with('cabangOlahraga')
+        ->approved()
+        ->orderByDesc('rating_rata2')
+        ->orderByDesc('jumlah_ulasan')
+        ->take(6)
+        ->get()
+        ->map(function ($lapangan) {
+            return [
+                'name'        => $lapangan->nama,
+                'sport'       => $lapangan->cabangOlahraga->nama_cabor,
+                'type'        => str_contains(strtolower($lapangan->fasilitas), 'indoor') ? 'Indoor' : 'Outdoor',
+                'location'    => $lapangan->lokasi,
+                'price'       => number_format($lapangan->slots()->min('harga') ?? 50000, 0, ',', '.'),
+                'rating'      => $lapangan->rating_rata2,
+                'reviewCount' => $lapangan->jumlah_ulasan,
+                'href'        => '/player/booking/lapangan/' . $lapangan->id,
+            ];
+        });
+
+    return view('welcome', compact('popularFields'));
+})->name('home');
 
 /* ─── Auth (Guest Only) ─────────────────────────────────────── */
 Route::middleware('guest')->group(function () {

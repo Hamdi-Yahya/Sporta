@@ -12,55 +12,53 @@
 @section('content')
 
 @php
-/* Dummy slots (FR-B4, FR-B5, FR-B6) */
-$slots = [
-    ['id'=>1,'time'=>'07:00–08:00','type'=>'normal',     'price'=>'80.000',  'status'=>'available',  'date'=>'2026-08-28'],
-    ['id'=>2,'time'=>'08:00–09:00','type'=>'normal',     'price'=>'80.000',  'status'=>'booked',     'date'=>'2026-08-28','bookedBy'=>'Bima S.'],
-    ['id'=>3,'time'=>'09:00–10:00','type'=>'normal',     'price'=>'80.000',  'status'=>'available',  'date'=>'2026-08-28'],
-    ['id'=>4,'time'=>'10:00–11:00','type'=>'open_match', 'price'=>'90.000',  'status'=>'available',  'date'=>'2026-08-28','quota_total'=>10,'quota_filled'=>5],
-    ['id'=>5,'time'=>'11:00–12:00','type'=>'normal',     'price'=>'80.000',  'status'=>'available',  'date'=>'2026-08-28'],
-    ['id'=>6,'time'=>'12:00–13:00','type'=>'normal',     'price'=>'90.000',  'status'=>'booked',     'date'=>'2026-08-28','bookedBy'=>'Ahmad F.'],
-    ['id'=>7,'time'=>'13:00–14:00','type'=>'open_match', 'price'=>'90.000',  'status'=>'available',  'date'=>'2026-08-28','quota_total'=>10,'quota_filled'=>8],
-    ['id'=>8,'time'=>'14:00–15:00','type'=>'normal',     'price'=>'90.000',  'status'=>'available',  'date'=>'2026-08-28'],
-    ['id'=>9,'time'=>'15:00–16:00','type'=>'normal',     'price'=>'90.000',  'status'=>'available',  'date'=>'2026-08-28'],
-    ['id'=>10,'time'=>'16:00–17:00','type'=>'normal',    'price'=>'90.000',  'status'=>'booked',     'date'=>'2026-08-28','bookedBy'=>'Dinda R.'],
-    ['id'=>11,'time'=>'17:00–18:00','type'=>'open_match','price'=>'100.000', 'status'=>'available',  'date'=>'2026-08-28','quota_total'=>10,'quota_filled'=>2],
-    ['id'=>12,'time'=>'18:00–19:00','type'=>'normal',    'price'=>'100.000', 'status'=>'booked',     'date'=>'2026-08-28','bookedBy'=>'Rizky M.'],
-    ['id'=>13,'time'=>'19:00–20:00','type'=>'normal',    'price'=>'100.000', 'status'=>'available',  'date'=>'2026-08-28'],
-    ['id'=>14,'time'=>'20:00–21:00','type'=>'normal',    'price'=>'100.000', 'status'=>'available',  'date'=>'2026-08-28'],
-    ['id'=>15,'time'=>'21:00–22:00','type'=>'normal',    'price'=>'90.000',  'status'=>'available',  'date'=>'2026-08-28'],
-];
-
-$bookedCount = count(array_filter($slots, fn($s) => $s['status'] === 'booked'));
-$availableCount = count($slots) - $bookedCount;
+$bookedCount = 0;
+$availableCount = 0;
+if (isset($slots)) {
+    $bookedCount = $slots->whereIn('status', ['dibooking', 'penuh'])->count();
+    $availableCount = $slots->where('status', 'tersedia')->count();
+}
 @endphp
 
 {{-- ─── Date picker & field selector ─────────────────────── --}}
+<form method="GET" action="{{ route('owner.schedules') }}" id="filter-form">
 <div class="card" style="padding:16px 20px;margin-bottom:20px;
             display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
     <div>
         <label class="form-label" style="margin-bottom:4px;">Lapangan</label>
-        <select class="form-input" style="width:auto;padding:8px 12px;font-size:0.875rem;">
-            <option>Futsal Planet Pekalongan</option>
+        <select name="lapangan_id" class="form-input" style="width:auto;padding:8px 12px;font-size:0.875rem;"
+                onchange="this.form.submit()">
+            <option value="">Pilih Lapangan</option>
+            @foreach($lapangans as $lap)
+                <option value="{{ $lap->id }}" {{ request('lapangan_id') == $lap->id ? 'selected' : '' }}>
+                    {{ $lap->nama }}
+                </option>
+            @endforeach
         </select>
     </div>
     <div>
         <label class="form-label" style="margin-bottom:4px;">Tanggal</label>
-        <input type="date" class="form-input" value="2026-08-28" style="width:auto;">
+        <input type="date" name="tanggal" class="form-input" 
+               value="{{ request('tanggal', now()->toDateString()) }}" 
+               style="width:auto;"
+               onchange="this.form.submit()">
     </div>
     <div style="margin-left:auto;display:flex;gap:10px;align-items:flex-end;">
-        <button onclick="document.getElementById('add-slot-modal').style.display='flex'"
+        @if($selectedLapangan)
+        <button type="button" onclick="document.getElementById('add-slot-modal').style.display='flex'"
                 class="btn-brand">
             <i data-lucide="plus" style="width:15px;height:15px;"></i>
             Tambah Slot
         </button>
+        @endif
     </div>
 </div>
+</form>
 
 {{-- ─── Stats bar ───────────────────────────────────────────── --}}
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
     @foreach([
-        ['label'=>'Total Slot',          'val'=>count($slots), 'color'=>'#1E293B'],
+        ['label'=>'Total Slot',          'val'=>isset($slots) ? $slots->count() : 0, 'color'=>'#1E293B'],
         ['label'=>'Terpesan',            'val'=>$bookedCount,  'color'=>'#16A34A'],
         ['label'=>'Masih Tersedia',      'val'=>$availableCount,'color'=>'#64748B'],
     ] as $s)
@@ -86,64 +84,73 @@ $availableCount = count($slots) - $bookedCount;
 
 {{-- ─── Slot grid (§3.7, FR-B4–B6) ───────────────────────── --}}
 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
-    @foreach($slots as $slot)
-    @php
-        $bg = '#fff';
-        $border = '#E2E8F0';
-        $textColor = '#1E293B';
+    @if(isset($slots) && $slots->count() > 0)
+        @foreach($slots as $slot)
+        @php
+            $bg = '#fff';
+            $border = '#E2E8F0';
+            $textColor = '#1E293B';
+            $isBooked = in_array($slot->status, ['dibooking', 'penuh']);
 
-        if ($slot['type'] === 'open_match') {
-            $bg = '#FFF7ED'; $border = '#FED7AA'; $textColor = '#9A3412';
-        } elseif ($slot['status'] === 'booked') {
-            $bg = '#DCFCE7'; $border = '#BBF7D0'; $textColor = '#166534';
-        }
-    @endphp
-    <div style="border:1.5px solid {{ $border }};background:{{ $bg }};border-radius:8px;
-                padding:10px 12px;position:relative;min-height:80px;">
+            if ($slot->tipe === 'open_match') {
+                $bg = '#FFF7ED'; $border = '#FED7AA'; $textColor = '#9A3412';
+            } elseif ($isBooked) {
+                $bg = '#DCFCE7'; $border = '#BBF7D0'; $textColor = '#166534';
+            }
+        @endphp
+        <div style="border:1.5px solid {{ $border }};background:{{ $bg }};border-radius:8px;
+                    padding:10px 12px;position:relative;min-height:80px;">
 
-        <div style="font-size:0.75rem;font-weight:700;color:{{ $textColor }};margin-bottom:3px;">
-            {{ $slot['time'] }}
+            <div style="font-size:0.75rem;font-weight:700;color:{{ $textColor }};margin-bottom:3px;">
+                {{ \Carbon\Carbon::parse($slot->jam_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($slot->jam_selesai)->format('H:i') }}
+            </div>
+
+            @if($slot->tipe === 'open_match')
+                <div style="font-size:0.65rem;font-weight:700;color:#EA580C;background:#FED7AA;
+                            border-radius:3px;padding:1px 5px;display:inline-block;margin-bottom:4px;">
+                    OPEN MATCH
+                </div>
+                <div style="font-size:0.7rem;color:#9A3412;">
+                    {{ $slot->kuota_terisi ?? 0 }}/{{ $slot->kuota_total }} Pemain<br>
+                    Rp {{ number_format($slot->hargaPerKursi(), 0, ',', '.') }}/org
+                </div>
+                <div class="progress-bar" style="margin-top:5px;">
+                    <div class="progress-bar-fill" style="width:{{ ($slot->kuota_total > 0 ? (($slot->kuota_terisi ?? 0)/$slot->kuota_total)*100 : 0) }}%;"></div>
+                </div>
+            @elseif($isBooked)
+                <div style="font-size:0.7rem;color:#166534;">
+                    Terpesan
+                </div>
+            @else
+                <div style="font-size:0.7rem;color:#94A3B8;">Tersedia</div>
+                <div style="font-size:0.7rem;color:#64748B;">Rp {{ number_format($slot->harga, 0, ',', '.') }}</div>
+            @endif
+
+            {{-- Action buttons (hanya untuk slot available) --}}
+            @if($slot->status === 'tersedia')
+            <div style="position:absolute;bottom:6px;right:6px;display:flex;gap:4px;">
+                <form action="{{ route('owner.schedules.destroy', $slot->id) }}" method="POST" onsubmit="return confirm('Hapus slot ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" style="background:none;border:none;cursor:pointer;color:#DC2626;padding:2px;" title="Hapus slot">
+                        <i data-lucide="trash-2" style="width:11px;height:11px;"></i>
+                    </button>
+                </form>
+            </div>
+            @endif
         </div>
-
-        @if($slot['type'] === 'open_match')
-            <div style="font-size:0.65rem;font-weight:700;color:#EA580C;background:#FED7AA;
-                        border-radius:3px;padding:1px 5px;display:inline-block;margin-bottom:4px;">
-                OPEN MATCH
-            </div>
-            <div style="font-size:0.7rem;color:#9A3412;">
-                {{ $slot['quota_filled'] }}/{{ $slot['quota_total'] }} Pemain<br>
-                Rp {{ number_format(intval(str_replace('.','',$slot['price'])) / $slot['quota_total']) }}/org
-            </div>
-            <div class="progress-bar" style="margin-top:5px;">
-                <div class="progress-bar-fill" style="width:{{ ($slot['quota_filled']/$slot['quota_total'])*100 }}%;"></div>
-            </div>
-        @elseif($slot['status'] === 'booked')
-            <div style="font-size:0.7rem;color:#166534;">
-                Terpesan<br>{{ $slot['bookedBy'] ?? '' }}
-            </div>
-        @else
-            <div style="font-size:0.7rem;color:#94A3B8;">Tersedia</div>
-            <div style="font-size:0.7rem;color:#64748B;">Rp {{ $slot['price'] }}</div>
-        @endif
-
-        {{-- Action buttons (hanya untuk slot available FR-B6) --}}
-        @if($slot['status'] === 'available')
-        <div style="position:absolute;bottom:6px;right:6px;display:flex;gap:4px;">
-            <button style="background:none;border:none;cursor:pointer;color:#94A3B8;padding:2px;"
-                    title="Edit slot">
-                <i data-lucide="edit-2" style="width:11px;height:11px;"></i>
-            </button>
-            <button style="background:none;border:none;cursor:pointer;color:#DC2626;padding:2px;"
-                    title="Hapus slot">
-                <i data-lucide="trash-2" style="width:11px;height:11px;"></i>
-            </button>
+        @endforeach
+    @else
+        <div style="grid-column:1/-1;text-align:center;padding:48px 24px;background:#F8FAFC;border-radius:10px;border:1px dashed #E2E8F0;">
+            <p style="font-size:0.9375rem;color:#64748B;margin:0;">
+                {{ $selectedLapangan ? 'Belum ada jadwal slot untuk tanggal ini.' : 'Pilih lapangan terlebih dahulu.' }}
+            </p>
         </div>
-        @endif
-    </div>
-    @endforeach
+    @endif
 </div>
 
 {{-- ─── Modal: Tambah Slot (FR-B4, FR-B5) ───────────────────── --}}
+@if($selectedLapangan)
 <div id="add-slot-modal"
      style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;
             align-items:center;justify-content:center;padding:20px;">
@@ -158,16 +165,20 @@ $availableCount = count($slots) - $bookedCount;
                 <i data-lucide="x" style="width:18px;height:18px;"></i>
             </button>
         </div>
+        <form method="POST" action="{{ route('owner.schedules.store') }}">
+        @csrf
+        <input type="hidden" name="lapangan_id" value="{{ $selectedLapangan->id }}">
+        <input type="hidden" name="tanggal" value="{{ request('tanggal', now()->toDateString()) }}">
         <div style="padding:22px;display:flex;flex-direction:column;gap:14px;">
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div>
                     <label class="form-label">Jam Mulai</label>
-                    <input type="time" class="form-input" value="07:00">
+                    <input type="time" name="jam_mulai" class="form-input" required>
                 </div>
                 <div>
                     <label class="form-label">Jam Selesai</label>
-                    <input type="time" class="form-input" value="08:00">
+                    <input type="time" name="jam_selesai" class="form-input" required>
                 </div>
             </div>
 
@@ -176,7 +187,7 @@ $availableCount = count($slots) - $bookedCount;
                 <label class="form-label">Jenis Slot</label>
                 <div style="display:flex;gap:10px;">
                     <label style="flex:1;cursor:pointer;">
-                        <input type="radio" name="slot_type" value="normal" checked
+                        <input type="radio" name="tipe" value="biasa" checked
                                onchange="toggleOpenMatchFields(false)"
                                style="display:none;" id="radio-normal">
                         <div id="box-normal" style="border:2px solid #16A34A;border-radius:7px;padding:12px;
@@ -186,7 +197,7 @@ $availableCount = count($slots) - $bookedCount;
                         </div>
                     </label>
                     <label style="flex:1;cursor:pointer;">
-                        <input type="radio" name="slot_type" value="open_match"
+                        <input type="radio" name="tipe" value="open_match"
                                onchange="toggleOpenMatchFields(true)"
                                style="display:none;" id="radio-om">
                         <div id="box-om" style="border:2px solid #E2E8F0;border-radius:7px;padding:12px;
@@ -200,14 +211,14 @@ $availableCount = count($slots) - $bookedCount;
 
             <div>
                 <label class="form-label">Harga Total Lapangan (Rp)</label>
-                <input type="number" id="slot-price" class="form-input" placeholder="90000"
+                <input type="number" name="harga" id="slot-price" class="form-input" placeholder="90000" min="0" required
                        oninput="calcPerSeat()">
             </div>
 
             {{-- Open Match fields (FR-B5) --}}
             <div id="om-fields" style="display:none;">
                 <label class="form-label">Kuota Pemain</label>
-                <input type="number" id="slot-quota" class="form-input" placeholder="10" min="2"
+                <input type="number" name="kuota_total" id="slot-quota" class="form-input" placeholder="10" min="2"
                        oninput="calcPerSeat()">
                 <div id="per-seat-label" style="font-size:0.8125rem;color:#EA580C;margin-top:6px;display:none;">
                     Harga per kursi: <strong id="per-seat-val">–</strong>
@@ -215,16 +226,18 @@ $availableCount = count($slots) - $bookedCount;
             </div>
 
             <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:8px;border-top:1px solid #F1F5F9;">
-                <button onclick="document.getElementById('add-slot-modal').style.display='none'"
+                <button type="button" onclick="document.getElementById('add-slot-modal').style.display='none'"
                         class="btn-outline btn-sm">Batal</button>
-                <button class="btn-brand btn-sm">
+                <button type="submit" class="btn-brand btn-sm">
                     <i data-lucide="save" style="width:13px;height:13px;"></i>
                     Simpan Slot
                 </button>
             </div>
         </div>
+        </form>
     </div>
 </div>
+@endif
 
 @push('scripts')
 <script>

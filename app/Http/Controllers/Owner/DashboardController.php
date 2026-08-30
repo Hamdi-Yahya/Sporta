@@ -16,12 +16,18 @@ class DashboardController extends Controller
 
         $stats = [
             'total_lapangan'  => $lapanganIds->count(),
-            'booking_masuk'   => Booking::whereHas('slot', fn($q) => $q->whereIn('lapangan_id', $lapanganIds))
+            'menunggu_verifikasi' => Booking::whereHas('slot', fn($q) => $q->whereIn('lapangan_id', $lapanganIds))
                                     ->where('status', 'menunggu_verifikasi')->count(),
-            'terkonfirmasi'   => Booking::whereHas('slot', fn($q) => $q->whereIn('lapangan_id', $lapanganIds))
-                                    ->where('status', 'terkonfirmasi')->count(),
-            'selesai'         => Booking::whereHas('slot', fn($q) => $q->whereIn('lapangan_id', $lapanganIds))
-                                    ->where('status', 'selesai')->count(),
+            'pendapatan_bulan_ini' => Booking::whereHas('slot', fn($q) => $q->whereIn('lapangan_id', $lapanganIds))
+                                    ->whereIn('status', ['terkonfirmasi', 'selesai'])
+                                    ->whereMonth('waktu_booking', now()->month)
+                                    ->whereYear('waktu_booking', now()->year)
+                                    ->sum('total_harga'),
+            'booking_bulan_ini' => Booking::whereHas('slot', fn($q) => $q->whereIn('lapangan_id', $lapanganIds))
+                                    ->whereMonth('waktu_booking', now()->month)
+                                    ->whereYear('waktu_booking', now()->year)
+                                    ->count(),
+            'rating_rata'     => \App\Models\Rating::whereIn('lapangan_id', $lapanganIds)->avg('rating') ?? 0,
         ];
 
         $recentBookings = Booking::with(['slot.lapangan', 'user'])
@@ -30,6 +36,13 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('owner.dashboard', compact('stats', 'recentBookings'));
+        $todaySlots = \App\Models\Slot::with('lapangan')
+            ->whereIn('lapangan_id', $lapanganIds)
+            ->whereDate('tanggal', now()->toDateString())
+            ->orderBy('jam_mulai')
+            ->take(6)
+            ->get();
+
+        return view('owner.dashboard', compact('stats', 'recentBookings', 'todaySlots'));
     }
 }

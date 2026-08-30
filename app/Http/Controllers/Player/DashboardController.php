@@ -19,12 +19,21 @@ class DashboardController extends Controller
             'selesai'         => Booking::where('user_id', $user->id)->where('status', 'selesai')->count(),
         ];
 
-        $recentBookings = Booking::with('slot.lapangan')
+        $recentBookings = Booking::with('slot.lapangan.cabangOlahraga')
             ->where('user_id', $user->id)
             ->latest()
             ->take(5)
             ->get();
 
-        return view('player.dashboard', compact('stats', 'recentBookings'));
+        $openMatch = \App\Models\Slot::with('lapangan.cabangOlahraga')
+            ->where('tipe', 'open_match')
+            ->where('status', 'tersedia')
+            ->where('tanggal', '>=', now()->toDateString())
+            ->whereColumn('kuota_terisi', '<', 'kuota_total')
+            ->orderBy('tanggal')
+            ->orderBy('jam_mulai')
+            ->first();
+
+        return view('player.dashboard', compact('stats', 'recentBookings', 'openMatch'));
     }
 }

@@ -105,13 +105,23 @@ class BookingController extends Controller
             ->with('success', 'Bukti transfer berhasil diunggah. Menunggu verifikasi Owner.');
     }
 
-    /** Riwayat booking user */
-    public function history()
+    /** Riwayat booking user — bisa difilter by status (FR-I1) */
+    public function history(Request $request)
     {
-        $bookings = Booking::with(['slot.lapangan.cabangOlahraga', 'pembayaran', 'rating'])
+        $query = Booking::with(['slot.lapangan.cabangOlahraga', 'pembayaran', 'rating'])
             ->where('user_id', Auth::id())
-            ->latest()
-            ->paginate(10);
+            ->latest();
+
+        // Filter berdasarkan status tab
+        $status = $request->get('status');
+        if ($status === 'ditolak') {
+            // Gabungkan ditolak + expired dalam satu tab
+            $query->whereIn('status', [Booking::STATUS_DITOLAK, Booking::STATUS_EXPIRED]);
+        } elseif ($status) {
+            $query->where('status', $status);
+        }
+
+        $bookings = $query->paginate(10);
 
         return view('player.history', compact('bookings'));
     }

@@ -14,9 +14,9 @@
 $activeBookings = isset($recentBookings) ? $recentBookings : collect();
 @endphp
 
-{{-- ─── Welcome banner ─────────────────────────────────────── --}}
-<div style="background:#0F2E1C;border-radius:12px;padding:28px 32px;
-            display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+{{-- ─── Welcome banner ───────────────────────────────── --}}
+<div style="background:#0F2E1C;border-radius:12px;padding:24px 28px;
+            display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;">
     <div>
         <p style="font-size:0.8125rem;color:#86EFAC;margin:0 0 4px;">Selamat datang kembali,</p>
         <h2 style="font-family:'Poppins',sans-serif;font-size:1.375rem;font-weight:700;
@@ -29,8 +29,8 @@ $activeBookings = isset($recentBookings) ? $recentBookings : collect();
     </a>
 </div>
 
-{{-- ─── Stats Row ───────────────────────────────────────────── --}}
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+{{-- ─── Stats Row ────────────────────────────────────── --}}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;" class="grid-responsive-4">
     @foreach([
         ['label'=>'Total Booking',   'value'=> $stats['total_booking'] ?? 0,   'icon'=>'calendar-check',  'color'=>'#16A34A'],
         ['label'=>'Sedang Aktif',    'value'=> $stats['aktif'] ?? 0,    'icon'=>'clock',           'color'=>'#F59E0B'],
@@ -52,8 +52,8 @@ $activeBookings = isset($recentBookings) ? $recentBookings : collect();
     @endforeach
 </div>
 
-{{-- ─── Active Bookings + Quick Access ─────────────────────── --}}
-<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;">
+{{-- ─── Active Bookings + Quick Access ────────────────── --}}
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;" class="grid-responsive-2">
 
     {{-- Active Bookings --}}
     <div>
@@ -65,37 +65,46 @@ $activeBookings = isset($recentBookings) ? $recentBookings : collect();
         </div>
 
         <div style="display:flex;flex-direction:column;gap:12px;">
-            @foreach($activeBookings as $b)
+            @forelse($activeBookings as $b)
+            @php
+                $lapangan = $b->slot->lapangan;
+                $tgl = \Carbon\Carbon::parse($b->slot->tanggal)->translatedFormat('d M Y');
+                $waktu = \Carbon\Carbon::parse($b->slot->jam_mulai)->format('H:i') . '–' . \Carbon\Carbon::parse($b->slot->jam_selesai)->format('H:i');
+            @endphp
             <div class="card" style="padding:16px 18px;">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
                     <div>
                         <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:0.9375rem;color:#1E293B;">
-                            {{ $b['field'] }}
+                            {{ $lapangan->nama }}
                         </div>
-                        <div style="font-size:0.8125rem;color:#64748B;margin-top:2px;">{{ $b['sport'] }}</div>
+                        <div style="font-size:0.8125rem;color:#64748B;margin-top:2px;">{{ $lapangan->cabangOlahraga->nama_cabor }}</div>
                     </div>
-                    <x-badge-status :status="$b['status']" />
+                    <x-badge-status :status="$b->status" />
                 </div>
                 <div style="display:flex;gap:16px;font-size:0.8125rem;color:#64748B;">
                     <span style="display:flex;align-items:center;gap:5px;">
-                        <i data-lucide="calendar" style="width:13px;height:13px;"></i>{{ $b['date'] }}
+                        <i data-lucide="calendar" style="width:13px;height:13px;"></i>{{ $tgl }}
                     </span>
                     <span style="display:flex;align-items:center;gap:5px;">
-                        <i data-lucide="clock" style="width:13px;height:13px;"></i>{{ $b['time'] }}
+                        <i data-lucide="clock" style="width:13px;height:13px;"></i>{{ $waktu }}
                     </span>
                 </div>
-                @if($b['status'] === 'menunggu_pembayaran')
+                @if($b->status === 'menunggu_pembayaran')
                 <div style="margin-top:12px;padding-top:12px;border-top:1px solid #F1F5F9;
                             display:flex;align-items:center;justify-content:space-between;">
                     <div style="display:flex;align-items:center;gap:6px;font-size:0.8125rem;color:#DC2626;">
                         <i data-lucide="timer" style="width:13px;height:13px;"></i>
-                        Batas bayar: <strong>23:47</strong>
+                        Batas bayar: <strong>{{ \Carbon\Carbon::parse($b->batas_waktu_bayar)->format('H:i') }}</strong>
                     </div>
-                    <a href="/player/booking/payment" class="btn-brand btn-sm">Upload Bukti Transfer</a>
+                    <a href="{{ route('player.booking.payment', $b->id) }}" class="btn-brand btn-sm">Upload Bukti Transfer</a>
                 </div>
                 @endif
             </div>
-            @endforeach
+            @empty
+            <div style="text-align:center;padding:24px;border:1px dashed #CBD5E1;border-radius:12px;">
+                <p style="font-size:0.8125rem;color:#64748B;margin:0;">Tidak ada booking aktif.</p>
+            </div>
+            @endforelse
         </div>
     </div>
 
@@ -127,24 +136,31 @@ $activeBookings = isset($recentBookings) ? $recentBookings : collect();
         </div>
 
         {{-- Open Match Tersedia --}}
+        @if(isset($openMatch) && $openMatch)
         <div style="margin-top:16px;">
             <h3 class="section-title" style="font-size:1rem;margin-bottom:12px;">Open Match Tersedia</h3>
             <div class="card" style="padding:16px;border-left:3px solid #EA580C;">
                 <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:0.875rem;color:#1E293B;margin-bottom:4px;">
-                    Bulu Tangkis — GOR Arinda
+                    {{ $openMatch->lapangan->cabangOlahraga->nama_cabor }} — {{ $openMatch->lapangan->nama }}
                 </div>
                 <div style="font-size:0.8125rem;color:#64748B;margin-bottom:10px;">
-                    Minggu 29 Agt • 10:00–11:00 • Rp 22.000/orang
+                    {{ \Carbon\Carbon::parse($openMatch->tanggal)->translatedFormat('l d M') }} • 
+                    {{ \Carbon\Carbon::parse($openMatch->jam_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($openMatch->jam_selesai)->format('H:i') }} • 
+                    Rp {{ number_format($openMatch->harga, 0, ',', '.') }}/orang
                 </div>
+                @php
+                    $percentage = $openMatch->kuota_total > 0 ? ($openMatch->kuota_terisi / $openMatch->kuota_total) * 100 : 0;
+                @endphp
                 <div class="progress-bar" style="margin-bottom:6px;">
-                    <div class="progress-bar-fill" style="width:60%;"></div>
+                    <div class="progress-bar-fill" style="width:{{ $percentage }}%;"></div>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:0.75rem;">
-                    <span style="color:#64748B;">3 dari 5 slot terisi</span>
+                    <span style="color:#64748B;">{{ $openMatch->kuota_terisi }} dari {{ $openMatch->kuota_total }} slot terisi</span>
                     <a href="/player/open-match" style="color:#EA580C;font-weight:600;text-decoration:none;">Bergabung →</a>
                 </div>
             </div>
         </div>
+        @endif
     </div>
 </div>
 

@@ -10,17 +10,26 @@ use Illuminate\Support\Facades\Auth;
 class KomunitasController extends Controller
 {
     /** Daftar 7 ruang chat komunitas per cabor (FR-F1) */
-    public function index()
+    public function index(Request $request)
     {
-        $komunitasList = Komunitas::with('cabangOlahraga')
-            ->withCount('pesanChats')
-            ->get();
+        $query = Komunitas::with('cabangOlahraga')->withCount('pesanChats');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('cabangOlahraga', function($q2) use ($search) {
+                    $q2->where('nama_cabor', 'like', '%' . $search . '%');
+                })->orWhere('deskripsi', 'like', '%' . $search . '%');
+            });
+        }
+
+        $komunitasList = $query->get();
 
         return view('player.community', compact('komunitasList'));
     }
 
     /** Tampilkan ruang chat + riwayat pesan (FR-F2, FR-F4) */
-    public function show(Komunitas $komunitas)
+    public function show(Request $request, Komunitas $komunitas)
     {
         $komunitas->load('cabangOlahraga');
 
@@ -30,7 +39,18 @@ class KomunitasController extends Controller
             ->take(100)
             ->get();
 
-        $komunitasList = Komunitas::with('cabangOlahraga')->get();
+        $query = Komunitas::with('cabangOlahraga');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('cabangOlahraga', function($q2) use ($search) {
+                    $q2->where('nama_cabor', 'like', '%' . $search . '%');
+                })->orWhere('deskripsi', 'like', '%' . $search . '%');
+            });
+        }
+
+        $komunitasList = $query->get();
 
         return view('player.community-chat', compact('komunitas', 'pesanList', 'komunitasList'));
     }
@@ -49,8 +69,8 @@ class KomunitasController extends Controller
             'waktu_kirim'  => now(),
         ]);
 
-        // TODO: Broadcast via Reverb saat Modul 8 diaktifkan
-        // event(new \App\Events\PesanChatDikirim($pesan));
+        // Broadcast via Reverb saat Modul 8 diaktifkan
+        event(new \App\Events\PesanTerkirim($pesan));
 
         if ($request->wantsJson()) {
             return response()->json([

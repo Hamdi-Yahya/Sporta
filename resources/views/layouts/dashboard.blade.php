@@ -18,13 +18,21 @@
 </head>
 <body style="background-color:#F8FAFC;">
 
+    {{-- ─── Overlay backdrop untuk mobile ─────────────────────────── --}}
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
     {{-- ─── Sidebar ──────────────────────────────────────────────── --}}
     <div class="sidebar" id="sidebar">
         {{-- Logo --}}
-        <div style="padding:24px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.07);">
+        <div style="padding:24px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;">
             <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
                 <img src="{{ asset('images/sportweb.png') }}" alt="SPORTA Logo" style="height:34px; object-fit:contain;">
             </a>
+            {{-- Close button (mobile only) --}}
+            <button onclick="closeSidebar()" class="hide-desktop"
+                style="background:none;border:none;cursor:pointer;padding:4px;color:#94A3B8;">
+                <i data-lucide="x" style="width:20px;height:20px;"></i>
+            </button>
         </div>
 
         {{-- Role label --}}
@@ -59,16 +67,16 @@
         <div class="topbar">
             {{-- Mobile menu toggle --}}
             <button id="sidebar-toggle"
-                style="display:none;background:none;border:none;cursor:pointer;padding:4px;"
-                onclick="document.getElementById('sidebar').classList.toggle('open')">
+                style="background:none;border:none;cursor:pointer;padding:4px;display:none;"
+                onclick="openSidebar()">
                 <i data-lucide="menu" style="width:22px;height:22px;color:#1E293B;"></i>
             </button>
 
-            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;color:#1E293B;">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;color:#1E293B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 @yield('page_title', 'Dashboard')
             </div>
 
-            <div style="display:flex;align-items:center;gap:16px;">
+            <div style="display:flex;align-items:center;gap:16px;flex-shrink:0;">
                 {{-- Notification bell --}}
                 <a href="#" style="position:relative;display:flex;align-items:center;color:#64748B;text-decoration:none;">
                     <i data-lucide="bell" style="width:20px;height:20px;"></i>
@@ -79,7 +87,7 @@
                 </a>
 
                 {{-- Avatar --}}
-                <div style="width:34px;height:34px;border-radius:50%;background:#16A34A;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                <div style="width:34px;height:34px;border-radius:50%;background:#16A34A;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
                     <span style="font-family:'Poppins',sans-serif;font-size:0.8125rem;font-weight:700;color:#fff;">
                         {{ Auth::check() ? strtoupper(substr(Auth::user()->name, 0, 1)) : 'U' }}
                     </span>
@@ -88,7 +96,7 @@
         </div>
 
         {{-- Page content --}}
-        <div style="padding:28px 32px;">
+        <div class="page-content" style="padding:24px 28px;">
             @yield('content')
         </div>
     </div>
@@ -96,25 +104,31 @@
     <script>
         lucide.createIcons();
 
-        // Show mobile toggle on small screens
-        const toggle = document.getElementById('sidebar-toggle');
         const mq = window.matchMedia('(max-width: 768px)');
+        const toggle = document.getElementById('sidebar-toggle');
+
+        // Tampilkan tombol hamburger di mobile
         function handleMQ(e) {
             toggle.style.display = e.matches ? 'flex' : 'none';
         }
         mq.addEventListener('change', handleMQ);
         handleMQ(mq);
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(e) {
-            const sidebar = document.getElementById('sidebar');
-            if (mq.matches && sidebar.classList.contains('open')) {
-                if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
-                    sidebar.classList.remove('open');
-                }
-            }
-        });
+        // Buka sidebar + overlay
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('sidebar-overlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Tutup sidebar + overlay
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
     </script>
     @stack('scripts')
 </body>
 </html>
+

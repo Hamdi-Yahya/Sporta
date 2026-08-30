@@ -31,7 +31,16 @@ $notifications = [
 ];
 @endphp
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:flex-start;">
+<style>
+@media (max-width: 768px) {
+    .profile-layout {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:flex-start;" class="profile-layout">
+
 
     {{-- ─── Profil ─────────────────────────────────────────────── --}}
     <div>
@@ -39,12 +48,12 @@ $notifications = [
             <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
                 <div style="width:72px;height:72px;border-radius:50%;background:#16A34A;
                             display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <span style="font-family:'Poppins',sans-serif;font-size:1.75rem;font-weight:800;color:#fff;">A</span>
+                    <span style="font-family:'Poppins',sans-serif;font-size:1.75rem;font-weight:800;color:#fff;">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
                 </div>
                 <div>
                     <h2 style="font-family:'Poppins',sans-serif;font-size:1.125rem;font-weight:700;
-                               color:#1E293B;margin:0 0 4px;">Ahmad Fauzan</h2>
-                    <p style="font-size:0.8125rem;color:#64748B;margin:0 0 4px;">ahmad.fauzan@email.com</p>
+                               color:#1E293B;margin:0 0 4px;">{{ Auth::user()->name }}</h2>
+                    <p style="font-size:0.8125rem;color:#64748B;margin:0 0 4px;">{{ Auth::user()->email }}</p>
                     <span class="badge badge-success">
                         <i data-lucide="user" style="width:10px;height:10px;"></i>
                         Player / User
@@ -73,9 +82,9 @@ $notifications = [
                        color:#1E293B;margin:0 0 18px;">Edit Informasi Akun</h3>
             <div style="display:flex;flex-direction:column;gap:14px;">
                 @foreach([
-                    ['Nama Lengkap','Ahmad Fauzan','text','user'],
-                    ['Nomor HP','08123456789','tel','smartphone'],
-                    ['Kota/Kecamatan','Pekalongan Barat','text','map-pin'],
+                    ['Nama Lengkap', Auth::user()->name, 'text', 'user'],
+                    ['Nomor HP', Auth::user()->no_telp ?? '-', 'tel', 'smartphone'],
+                    ['Kota/Kecamatan', 'Pekalongan Barat', 'text', 'map-pin'], // Sementara statis jika tidak ada di tabel users
                 ] as $field)
                 <div>
                     <label class="form-label">{{ $field[0] }}</label>
@@ -95,7 +104,7 @@ $notifications = [
                         <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94A3B8;">
                             <i data-lucide="mail" style="width:15px;height:15px;"></i>
                         </span>
-                        <input type="email" class="form-input" value="ahmad.fauzan@email.com"
+                        <input type="email" class="form-input" value="{{ Auth::user()->email }}"
                                style="padding-left:36px;background:#F8FAFC;color:#94A3B8;" readonly>
                     </div>
                     <p style="font-size:0.75rem;color:#94A3B8;margin:4px 0 0;">Email tidak dapat diubah</p>
