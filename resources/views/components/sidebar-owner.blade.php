@@ -1,8 +1,3 @@
-{{-- ─── Sidebar Owner Navigation (§3.5) ─────────────────────────
-     Menu: Beranda, Kelola Lapangan, Kelola Jadwal, Verifikasi Booking,
-           Komunitas, Profil Usaha
-─────────────────────────────────────────────────────────────── --}}
-
 @php $current = request()->route()->getName() ?? ''; @endphp
 
 <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px;">
@@ -47,14 +42,7 @@
         </a>
     </li>
 
-    {{-- Komunitas --}}
-    <li>
-        <a href="/player/community"
-           class="sidebar-link {{ str_starts_with($current, 'player.community') ? 'active' : '' }}">
-            <i data-lucide="message-circle" style="width:17px;height:17px;flex-shrink:0;"></i>
-            <span>Komunitas</span>
-        </a>
-    </li>
+
 
     {{-- Profil Usaha --}}
     <li>

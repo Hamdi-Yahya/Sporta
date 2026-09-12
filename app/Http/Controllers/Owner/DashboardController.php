@@ -27,7 +27,7 @@ class DashboardController extends Controller
                                     ->whereMonth('waktu_booking', now()->month)
                                     ->whereYear('waktu_booking', now()->year)
                                     ->count(),
-            'rating_rata'     => \App\Models\Rating::whereIn('lapangan_id', $lapanganIds)->avg('rating') ?? 0,
+            'rating_rata'     => \App\Models\Rating::whereIn('lapangan_id', $lapanganIds)->avg('skor') ?? 0,
         ];
 
         $recentBookings = Booking::with(['slot.lapangan', 'user'])

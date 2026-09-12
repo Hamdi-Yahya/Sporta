@@ -11,51 +11,54 @@
 
 @section('content')
 
-@php
-/* Dummy data lapangan owner (FR-B1–B3) */
-$fields = [
-    ['id'=>1,'name'=>'Futsal Planet Pekalongan','sport'=>'Futsal','type'=>'Indoor',
-     'location'=>'Jl. Dr. Cipto No. 12, Pekalongan Barat','price'=>'80.000–100.000',
-     'rating'=>4.8,'reviewCount'=>41,'status'=>'approved',
-     'facilities'=>['AC','Parkir','Kantin','Wifi']],
-];
-$pendingFields = [
-    ['id'=>2,'name'=>'Futsal Planet 2','sport'=>'Futsal','type'=>'Indoor',
-     'location'=>'Jl. Sriwijaya No. 5, Pekalongan Timur','submitted'=>'26 Agt 2026','status'=>'pending'],
-];
-@endphp
+{{-- Flash message --}}
+@if(session('success'))
+<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+    <i data-lucide="check-circle" style="width:16px;height:16px;color:#16A34A;flex-shrink:0;"></i>
+    <span style="font-size:0.875rem;color:#166534;">{{ session('success') }}</span>
+</div>
+@endif
 
 {{-- ─── Header actions ─────────────────────────────────────── --}}
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
     <p style="font-size:0.875rem;color:#64748B;margin:0;">
         Kelola semua lapangan yang kamu daftarkan di SPORTA.
     </p>
-    <button onclick="document.getElementById('add-field-modal').style.display='flex'"
-            class="btn-brand">
+    <a href="{{ route('owner.fields.create') }}" class="btn-brand">
         <i data-lucide="plus" style="width:15px;height:15px;"></i>
         Daftarkan Lapangan Baru
-    </button>
+    </a>
 </div>
 
+@php
+    $approvedFields = $lapangans->where('status_approval', 'approved');
+    $pendingFields  = $lapangans->where('status_approval', 'pending');
+@endphp
+
 {{-- ─── Lapangan yang sudah approved ──────────────────────── --}}
-@if(count($fields))
+@if($approvedFields->count())
 <h3 class="section-title" style="font-size:0.9375rem;margin-bottom:14px;">Lapangan Aktif</h3>
 <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;">
-    @foreach($fields as $f)
+    @foreach($approvedFields as $lapangan)
     <div class="card" style="padding:20px;">
         <div style="display:flex;align-items:flex-start;gap:18px;">
-            {{-- Foto placeholder --}}
-            <div style="width:120px;height:90px;border-radius:8px;background:linear-gradient(135deg,#1E293B,#334155);
-                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i data-lucide="image" style="width:24px;height:24px;color:#64748B;"></i>
+            {{-- Foto lapangan --}}
+            <div style="width:120px;height:90px;border-radius:8px;background:#F1F5F9;
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
+                @if($lapangan->foto)
+                    <img src="{{ asset('storage/' . $lapangan->foto) }}" alt="Foto"
+                         style="width:100%;height:100%;object-fit:cover;">
+                @else
+                    <i data-lucide="image" style="width:24px;height:24px;color:#94A3B8;"></i>
+                @endif
             </div>
 
-            <div style="flex:1;">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+            <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:12px;">
                     <div>
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
                             <h3 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;
-                                       color:#1E293B;margin:0;">{{ $f['name'] }}</h3>
+                                       color:#1E293B;margin:0;">{{ $lapangan->nama }}</h3>
                             <span class="badge badge-success">
                                 <i data-lucide="check-circle" style="width:10px;height:10px;"></i>
                                 Disetujui Admin
@@ -63,47 +66,48 @@ $pendingFields = [
                         </div>
                         <div style="font-size:0.8125rem;color:#64748B;display:flex;align-items:center;gap:5px;">
                             <i data-lucide="map-pin" style="width:12px;height:12px;"></i>
-                            {{ $f['location'] }}
+                            {{ $lapangan->lokasi }}
                         </div>
                     </div>
-                    <div style="text-align:right;">
-                        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;color:#166534;">
-                            Rp {{ $f['price'] }}/jam
-                        </div>
+                    <div style="text-align:right;flex-shrink:0;">
                         <div style="font-size:0.8125rem;color:#64748B;">
-                            {{ $f['sport'] }} • {{ $f['type'] }}
+                            {{ $lapangan->cabangOlahraga->nama_cabor }}
                         </div>
                     </div>
                 </div>
 
-                <div style="display:flex;gap:14px;font-size:0.8125rem;color:#64748B;margin-bottom:12px;">
-                    <span style="display:flex;align-items:center;gap:4px;">
-                        @for($i=1;$i<=5;$i++)
-                            <i data-lucide="star" style="width:12px;height:12px;color:{{ $i<=$f['rating']?'#F59E0B':'#CBD5E1' }};fill:{{ $i<=$f['rating']?'#F59E0B':'transparent' }};"></i>
-                        @endfor
-                        <strong>{{ $f['rating'] }}</strong> ({{ $f['reviewCount'] }} ulasan)
-                    </span>
-                </div>
-
-                {{-- Facilities --}}
+                @if($lapangan->fasilitas)
                 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
-                    @foreach($f['facilities'] as $fac)
+                    @foreach(explode(',', $lapangan->fasilitas) as $fac)
                     <span style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:4px;
                                  padding:2px 8px;font-size:0.75rem;color:#166534;font-weight:500;">
-                        {{ $fac }}
+                        {{ trim($fac) }}
                     </span>
                     @endforeach
                 </div>
+                @endif
 
-                <div style="display:flex;gap:8px;">
-                    <a href="/owner/schedules" class="btn-brand btn-sm">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <a href="{{ route('owner.schedules') }}" class="btn-brand btn-sm">
                         <i data-lucide="calendar-days" style="width:13px;height:13px;"></i>
                         Kelola Jadwal
                     </a>
-                    <button class="btn-outline btn-sm">
+                    {{-- Tombol Edit — dihubungkan ke route owner.fields.edit --}}
+                    <a href="{{ route('owner.fields.edit', $lapangan) }}" class="btn-outline btn-sm">
                         <i data-lucide="edit-2" style="width:13px;height:13px;"></i>
                         Edit Lapangan
-                    </button>
+                    </a>
+                    {{-- Tombol Hapus --}}
+                    <form method="POST" action="{{ route('owner.fields.destroy', $lapangan) }}"
+                          onsubmit="return confirm('Hapus lapangan ini?')" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn-outline btn-sm"
+                                style="color:#DC2626;border-color:#FECACA;">
+                            <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                            Hapus
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -113,35 +117,36 @@ $pendingFields = [
 @endif
 
 {{-- ─── Lapangan pending approval (FR-B2, FR-B3) ──────────── --}}
-@if(count($pendingFields))
+@if($pendingFields->count())
 <h3 class="section-title" style="font-size:0.9375rem;margin-bottom:14px;">Menunggu Persetujuan Admin</h3>
 <div style="display:flex;flex-direction:column;gap:12px;">
-    @foreach($pendingFields as $pf)
+    @foreach($pendingFields as $lapangan)
     <div class="card" style="padding:16px 18px;border-left:3px solid #F59E0B;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
             <div>
                 <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:0.9375rem;color:#1E293B;margin-bottom:4px;">
-                    {{ $pf['name'] }}
+                    {{ $lapangan->nama }}
                     <span class="badge badge-warning" style="margin-left:8px;">
                         <i data-lucide="clock" style="width:10px;height:10px;"></i>
                         Menunggu Review Admin
                     </span>
                 </div>
                 <div style="font-size:0.8125rem;color:#64748B;">
-                    {{ $pf['sport'] }} • {{ $pf['type'] }} • {{ $pf['location'] }}
+                    {{ $lapangan->cabangOlahraga->nama_cabor }} • {{ $lapangan->lokasi }}
                 </div>
                 <div style="font-size:0.75rem;color:#94A3B8;margin-top:4px;">
-                    Diajukan: {{ $pf['submitted'] }}
+                    Diajukan: {{ $lapangan->created_at->format('d M Y') }}
                 </div>
             </div>
-            <div style="text-align:right;">
+            <div style="text-align:right;flex-shrink:0;">
                 <p style="font-size:0.8125rem;color:#92400E;margin:0 0 8px;">
                     Lapangan belum tayang ke publik<br>hingga Admin menyetujui.
                 </p>
-                <button class="btn-outline btn-sm">
+                {{-- Tombol Edit untuk lapangan pending --}}
+                <a href="{{ route('owner.fields.edit', $lapangan) }}" class="btn-outline btn-sm">
                     <i data-lucide="edit-2" style="width:13px;height:13px;"></i>
                     Edit Data
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -149,80 +154,16 @@ $pendingFields = [
 </div>
 @endif
 
-{{-- ─── Modal: Daftarkan Lapangan Baru (FR-B1) ──────────────── --}}
-<div id="add-field-modal"
-     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;
-            align-items:center;justify-content:center;padding:20px;">
-    <div style="background:#fff;border-radius:12px;width:100%;max-width:600px;
-                max-height:90vh;overflow-y:auto;">
-        <div style="padding:20px 24px;border-bottom:1px solid #F1F5F9;
-                    display:flex;align-items:center;justify-content:space-between;">
-            <h3 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;color:#1E293B;margin:0;">
-                Daftarkan Lapangan Baru
-            </h3>
-            <button onclick="document.getElementById('add-field-modal').style.display='none'"
-                    style="background:none;border:none;cursor:pointer;color:#94A3B8;">
-                <i data-lucide="x" style="width:20px;height:20px;"></i>
-            </button>
-        </div>
-        <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-                <div style="grid-column:1/-1;">
-                    <label class="form-label">Nama Lapangan</label>
-                    <input type="text" class="form-input" placeholder="Nama GOR / lapangan kamu">
-                </div>
-                <div>
-                    <label class="form-label">Jenis Olahraga</label>
-                    <select class="form-input">
-                        @foreach(['Futsal','Bulu Tangkis','Basket','Tenis','Padel','Mini Soccer'] as $s)
-                        <option>{{ $s }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="form-label">Tipe Lapangan</label>
-                    <select class="form-input">
-                        <option>Indoor</option>
-                        <option>Outdoor</option>
-                    </select>
-                </div>
-                <div style="grid-column:1/-1;">
-                    <label class="form-label">Alamat Lengkap</label>
-                    <input type="text" class="form-input" placeholder="Jl. ... No. ..., Kelurahan, Kecamatan">
-                </div>
-                <div>
-                    <label class="form-label">Harga per Jam (Rp)</label>
-                    <input type="number" class="form-input" placeholder="80000">
-                </div>
-                <div>
-                    <label class="form-label">No. HP / WA Kontak</label>
-                    <input type="tel" class="form-input" placeholder="08xxxxxxxxxx">
-                </div>
-                <div style="grid-column:1/-1;">
-                    <label class="form-label">Deskripsi Lapangan</label>
-                    <textarea class="form-input" style="resize:none;min-height:80px;" placeholder="Fasilitas, kapasitas, kondisi, dll."></textarea>
-                </div>
-                <div style="grid-column:1/-1;">
-                    <label class="form-label">Upload Foto Lapangan</label>
-                    <div style="border:2px dashed #CBD5E1;border-radius:8px;padding:24px;text-align:center;cursor:pointer;">
-                        <i data-lucide="upload-cloud" style="width:28px;height:28px;color:#94A3B8;margin-bottom:6px;"></i>
-                        <div style="font-size:0.8125rem;color:#64748B;">Klik untuk upload foto</div>
-                        <div style="font-size:0.75rem;color:#94A3B8;">JPG, PNG — Maks. 5 MB per foto</div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:8px;border-top:1px solid #F1F5F9;">
-                <button onclick="document.getElementById('add-field-modal').style.display='none'"
-                        class="btn-outline">Batal</button>
-                <button class="btn-brand">
-                    <i data-lucide="send" style="width:15px;height:15px;"></i>
-                    Submit untuk Review Admin
-                </button>
-            </div>
-        </div>
-    </div>
+{{-- Kosong --}}
+@if($lapangans->isEmpty())
+<div style="text-align:center;padding:56px 24px;background:#F8FAFC;border-radius:10px;border:1px dashed #E2E8F0;margin-top:8px;">
+    <i data-lucide="map-pin-off" style="width:40px;height:40px;color:#94A3B8;margin-bottom:12px;opacity:0.5;"></i>
+    <p style="font-size:0.9375rem;color:#64748B;margin:0 0 12px;">Kamu belum mendaftarkan lapangan apapun.</p>
+    <a href="{{ route('owner.fields.create') }}" class="btn-brand">
+        <i data-lucide="plus" style="width:15px;height:15px;"></i>
+        Daftarkan Lapangan Pertamamu
+    </a>
 </div>
+@endif
 
 @endsection

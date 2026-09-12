@@ -97,8 +97,8 @@
                         </span>
                         <input type="password" id="password" name="password" class="form-input"
                                style="padding-left:38px;"
-                               placeholder="Masukkan password" required id="login-password">
-                        <button type="button" onclick="togglePass('login-password','toggle-icon')"
+                               placeholder="Masukkan password" required>
+                        <button type="button" onclick="togglePass('password','toggle-icon')"
                                 style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
                                        background:none;border:none;cursor:pointer;color:#94A3B8;">
                             <i id="toggle-icon" data-lucide="eye" style="width:16px;height:16px;"></i>

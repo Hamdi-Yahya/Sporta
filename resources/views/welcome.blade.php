@@ -103,7 +103,17 @@
             {{-- Right: Floating card illustration --}}
             <div class="hero-right" style="display:flex;flex-direction:column;gap:14px;position:relative;">
 
-                {{-- Main card --}}
+                {{-- Booking terkonfirmasi terbaru --}}
+                @if($latestBooking && $latestBooking->slot)
+                @php
+                    $slot    = $latestBooking->slot;
+                    $namaLap = optional($slot->lapangan)->nama ?? 'Lapangan';
+                    $hari    = \Carbon\Carbon::parse($slot->tanggal)->translatedFormat('l, d M');
+                    $jam     = \Carbon\Carbon::parse($slot->jam_mulai)->format('H:i')
+                             . ' – '
+                             . \Carbon\Carbon::parse($slot->jam_selesai)->format('H:i');
+                    $harga   = 'Rp ' . number_format($latestBooking->total_harga, 0, ',', '.');
+                @endphp
                 <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
                             border-radius:12px;padding:20px;backdrop-filter:blur(4px);">
                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
@@ -115,34 +125,78 @@
                             <div style="font-family:'Poppins',sans-serif;font-weight:700;color:#fff;font-size:0.9375rem;">
                                 Booking Dikonfirmasi
                             </div>
-                            <div style="font-size:0.8125rem;color:#86EFAC;">Futsal Planet • Sabtu, 28 Agt</div>
+                            <div style="font-size:0.8125rem;color:#86EFAC;">{{ $namaLap }} • {{ $hari }}</div>
                         </div>
                         <span class="badge badge-success" style="margin-left:auto;">✓ Terkonfirmasi</span>
                     </div>
-                    <div style="display:flex;gap:12px;font-size:0.8125rem;color:#CBD5E1;">
-                        <span><i data-lucide="clock" style="width:13px;height:13px;display:inline;"></i> 16:00 – 17:00</span>
-                        <span><i data-lucide="users" style="width:13px;height:13px;display:inline;"></i> 5/10 Pemain</span>
-                        <span><i data-lucide="wallet" style="width:13px;height:13px;display:inline;"></i> Rp 45.000</span>
+                    <div style="display:flex;gap:12px;font-size:0.8125rem;color:#CBD5E1;flex-wrap:wrap;">
+                        <span><i data-lucide="clock" style="width:13px;height:13px;display:inline;"></i> {{ $jam }}</span>
+                        <span><i data-lucide="wallet" style="width:13px;height:13px;display:inline;"></i> {{ $harga }}</span>
                     </div>
                 </div>
+                @else
+                {{-- Fallback jika belum ada booking terkonfirmasi --}}
+                <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+                            border-radius:12px;padding:20px;backdrop-filter:blur(4px);">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                        <div style="width:42px;height:42px;background:#16A34A;border-radius:10px;
+                                    display:flex;align-items:center;justify-content:center;">
+                            <i data-lucide="calendar-check" style="width:20px;height:20px;color:#fff;"></i>
+                        </div>
+                        <div>
+                            <div style="font-family:'Poppins',sans-serif;font-weight:700;color:#fff;font-size:0.9375rem;">
+                                Booking Lapangan
+                            </div>
+                            <div style="font-size:0.8125rem;color:#86EFAC;">Pesan lapangan favoritmu sekarang</div>
+                        </div>
+                        <span class="badge badge-success" style="margin-left:auto;">✓ Mudah</span>
+                    </div>
+                    <div style="font-size:0.8125rem;color:#CBD5E1;">
+                        Konfirmasi instan • Pembayaran aman • Jadwal real-time
+                    </div>
+                </div>
+                @endif
 
-                {{-- Open Match card --}}
+                {{-- Open Match aktif terbaru --}}
+                @if($latestOpenMatch)
+                @php
+                    $namaLapOM   = optional($latestOpenMatch->lapangan)->nama ?? 'Lapangan';
+                    $terisi      = $latestOpenMatch->kuota_terisi ?? 0;
+                    $total       = $latestOpenMatch->kuota_total  ?? 1;
+                    $persen      = $total > 0 ? round(($terisi / $total) * 100) : 0;
+                    $hargaPerKur = 'Rp ' . number_format($latestOpenMatch->hargaPerKursi(), 0, ',', '.');
+                @endphp
                 <div style="background:rgba(234,88,12,0.15);border:1px solid rgba(234,88,12,0.3);
                             border-radius:12px;padding:18px;">
                     <div style="font-size:0.75rem;font-weight:600;color:#FB923C;letter-spacing:0.05em;margin-bottom:8px;">
                         OPEN MATCH — BUTUH PARTNER
                     </div>
                     <div style="font-family:'Poppins',sans-serif;font-weight:700;color:#fff;font-size:0.9375rem;margin-bottom:12px;">
-                        GOR Bulu Tangkis Arinda
+                        {{ $namaLapOM }}
                     </div>
                     <div class="progress-bar" style="margin-bottom:6px;">
-                        <div class="progress-bar-fill" style="width:60%;"></div>
+                        <div class="progress-bar-fill" style="width:{{ $persen }}%;"></div>
                     </div>
                     <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#CBD5E1;">
-                        <span>3/5 Pemain Bergabung</span>
-                        <span style="color:#FB923C;font-weight:600;">Rp 22.000/orang</span>
+                        <span>{{ $terisi }}/{{ $total }} Pemain Bergabung</span>
+                        <span style="color:#FB923C;font-weight:600;">{{ $hargaPerKur }}/orang</span>
                     </div>
                 </div>
+                @else
+                {{-- Fallback jika tidak ada open match aktif --}}
+                <div style="background:rgba(234,88,12,0.15);border:1px solid rgba(234,88,12,0.3);
+                            border-radius:12px;padding:18px;">
+                    <div style="font-size:0.75rem;font-weight:600;color:#FB923C;letter-spacing:0.05em;margin-bottom:8px;">
+                        OPEN MATCH — CARI PARTNER
+                    </div>
+                    <div style="font-family:'Poppins',sans-serif;font-weight:700;color:#fff;font-size:0.9375rem;margin-bottom:12px;">
+                        Bagi biaya, tambah teman main
+                    </div>
+                    <div style="font-size:0.8rem;color:#CBD5E1;">
+                        Belum ada open match aktif saat ini — buka sesi barumu!
+                    </div>
+                </div>
+                @endif
 
                 {{-- Community card --}}
                 <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
@@ -197,6 +251,7 @@
                     :price="$field['price']"
                     :rating="$field['rating']"
                     :reviewCount="$field['reviewCount']"
+                    :image="$field['image'] ?? null"
                     :href="$field['href']"
                 />
             @endforeach

@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 /* ─── Public ────────────────────────────────────────────────── */
 Route::get('/', function () {
+    /* Lapangan populer (section hero bawah) */
     $popularFields = \App\Models\Lapangan::with('cabangOlahraga')
         ->approved()
         ->orderByDesc('rating_rata2')
@@ -41,10 +42,25 @@ Route::get('/', function () {
                 'rating'      => $lapangan->rating_rata2,
                 'reviewCount' => $lapangan->jumlah_ulasan,
                 'href'        => '/player/booking/lapangan/' . $lapangan->id,
+                'image'       => $lapangan->foto ? asset('storage/' . $lapangan->foto) : null,
             ];
         });
 
-    return view('welcome', compact('popularFields'));
+    /* Booking terkonfirmasi terbaru — untuk hero card */
+    $latestBooking = \App\Models\Booking::with(['slot.lapangan'])
+        ->where('status', \App\Models\Booking::STATUS_TERKONFIRMASI)
+        ->latest()
+        ->first();
+
+    /* Open Match aktif terbaru — untuk hero card */
+    $latestOpenMatch = \App\Models\Slot::with('lapangan')
+        ->openMatch()
+        ->tersedia()
+        ->whereDate('tanggal', '>=', now()->toDateString())
+        ->orderBy('tanggal')
+        ->first();
+
+    return view('welcome', compact('popularFields', 'latestBooking', 'latestOpenMatch'));
 })->name('home');
 
 /* ─── Auth (Guest Only) ─────────────────────────────────────── */

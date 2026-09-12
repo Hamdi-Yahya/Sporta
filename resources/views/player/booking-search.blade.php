@@ -136,7 +136,7 @@
     </aside>
 
     {{-- ─── Grid Hasil Lapangan ────────────────────────────────── --}}
-    <div>
+    <div style="min-width: 0;">
         {{-- Search bar nama + sort --}}
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;" class="booking-searchbar">
             <div style="flex:1;min-width:200px;position:relative;">
@@ -176,6 +176,7 @@
                     :price="number_format($lapangan->slots()->min('harga') ?? 50000, 0, ',', '.')"
                     :rating="$lapangan->rating_rata2"
                     :reviewCount="$lapangan->jumlah_ulasan"
+                    :image="$lapangan->foto ? asset('storage/' . $lapangan->foto) : null"
                     :href="'/player/booking/lapangan/'.$lapangan->id"
                 />
             @empty
