@@ -5,11 +5,61 @@
 
 @section('content')
 
-<div style="min-height:100vh;display:flex;">
+@push('styles')
+<style>
+    /* ── Responsive: Register Page ── */
+    .register-wrapper {
+        min-height: 100vh;
+        display: flex;
+    }
+    .register-form-panel {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 60px;
+        background: #fff;
+        overflow-y: auto;
+    }
+    .register-branding {
+        flex: 0.7;
+        background: #14532D;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 60px;
+        position: relative;
+        overflow: hidden;
+        min-width: 320px;
+    }
+
+    @media (max-width: 768px) {
+        /* Sembunyikan panel branding di mobile */
+        .register-branding {
+            display: none;
+        }
+        /* Form panel ambil seluruh layar dengan padding lebih kecil */
+        .register-form-panel {
+            padding: 32px 24px;
+            align-items: flex-start;
+        }
+        .register-wrapper {
+            flex-direction: column;
+        }
+        /* Logo di atas form (mobile only) */
+        .register-mobile-logo {
+            display: block !important;
+        }
+        /* Sembunyikan logo yang ada di dalam form-panel (sudah ada link logo di form) */
+    }
+</style>
+@endpush
+
+<div class="register-wrapper">
 
     {{-- ─── Left Panel (Form) ─────────────────────────────────── --}}
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;
-                padding:48px 60px;background:#fff;overflow-y:auto;">
+    <div class="register-form-panel">
         <div style="width:100%;max-width:460px;">
 
             <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:28px;">
@@ -197,9 +247,7 @@
     </div>
 
     {{-- ─── Right Panel (Branding) ─────────────────────────────── --}}
-    <div style="flex:0.7;background:#14532D;display:flex;flex-direction:column;
-                align-items:flex-start;justify-content:center;padding:60px;
-                position:relative;overflow:hidden;min-width:320px;">
+    <div class="register-branding">
 
         <div style="position:absolute;top:-40px;left:-40px;width:240px;height:240px;
                     border:1px solid rgba(255,255,255,0.08);border-radius:50%;"></div>

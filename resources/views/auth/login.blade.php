@@ -5,12 +5,63 @@
 
 @section('content')
 
-<div style="min-height:100vh;display:flex;">
+@push('styles')
+<style>
+    /* ── Responsive: Login Page ── */
+    .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+    }
+    .login-branding {
+        flex: 1;
+        background: #0F2E1C;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 60px;
+        position: relative;
+        overflow: hidden;
+    }
+    .login-form-panel {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 60px;
+        background: #fff;
+    }
+
+    /* Sembunyikan branding panel di mobile, tampilkan logo di atas form */
+    @media (max-width: 768px) {
+        .login-branding {
+            display: none;
+        }
+        .login-form-panel {
+            padding: 40px 24px;
+            align-items: flex-start;
+        }
+        .login-wrapper {
+            flex-direction: column;
+        }
+        .login-mobile-logo {
+            display: flex !important;
+        }
+    }
+</style>
+@endpush
+
+{{-- Mobile logo (hanya muncul di HP) --}}
+<div class="login-mobile-logo" style="display:none;background:#0F2E1C;padding:20px 24px;">
+    <a href="/">
+        <img src="{{ asset('images/sportweb.png') }}" alt="SPORTA Logo" style="height:30px;object-fit:contain;">
+    </a>
+</div>
+
+<div class="login-wrapper">
 
     {{-- ─── Left Panel (Branding) ──────────────────────────────── --}}
-    <div style="flex:1;background:#0F2E1C;display:flex;flex-direction:column;
-                align-items:flex-start;justify-content:center;padding:60px;
-                position:relative;overflow:hidden;">
+    <div class="login-branding">
 
         {{-- Decorative circles --}}
         <div style="position:absolute;bottom:-40px;right:-40px;width:260px;height:260px;
@@ -46,8 +97,7 @@
     </div>
 
     {{-- ─── Right Panel (Form) ─────────────────────────────────── --}}
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;
-                padding:48px 60px;background:#fff;">
+    <div class="login-form-panel">
         <div style="width:100%;max-width:420px;">
 
             <div style="margin-bottom:32px;">
