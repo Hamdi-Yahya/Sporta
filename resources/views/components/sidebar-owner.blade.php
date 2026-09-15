@@ -1,4 +1,9 @@
-@php $current = request()->route()->getName() ?? ''; @endphp
+@php 
+    $current = request()->route()->getName() ?? ''; 
+    $pendingBookingsCount = \App\Models\Booking::whereHas('slot.lapangan', function($q) {
+        $q->where('owner_id', \Illuminate\Support\Facades\Auth::id());
+    })->where('status', \App\Models\Booking::STATUS_MENUNGGU_VERIFIKASI)->count();
+@endphp
 
 <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px;">
 
@@ -37,8 +42,10 @@
             <i data-lucide="shield-check" style="width:17px;height:17px;flex-shrink:0;"></i>
             <span>Verifikasi Booking</span>
             {{-- Badge notif --}}
+            @if($pendingBookingsCount > 0)
             <span style="margin-left:auto;background:#EA580C;color:#fff;font-size:0.6875rem;font-weight:700;
-                         padding:1px 7px;border-radius:10px;">4</span>
+                         padding:1px 7px;border-radius:10px;">{{ $pendingBookingsCount }}</span>
+            @endif
         </a>
     </li>
 

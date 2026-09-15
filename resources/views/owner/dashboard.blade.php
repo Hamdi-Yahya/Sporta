@@ -19,8 +19,10 @@
             {{ Auth::user()->nama_usaha ?? Auth::user()->name }}
         </h2>
         <p style="font-size:0.875rem;color:#A7F3D0;margin:6px 0 0;">
-            Jl. Dr. Cipto No. 12, Pekalongan Barat
+            {{ Auth::user()->alamat ?? '' }}
+            @if($stats['total_lapangan'] > 0)
             <span style="margin-left:8px;" class="badge badge-success">Aktif & Terverifikasi</span>
+            @endif
         </p>
     </div>
     <div style="text-align:right;">
@@ -127,9 +129,9 @@
         <h3 class="section-title" style="font-size:1rem;margin-bottom:12px;">Kelola</h3>
         <div style="display:flex;flex-direction:column;gap:8px;">
             @foreach([
-                ['href'=>'/owner/fields',         'icon'=>'map-pin',    'title'=>'Kelola Lapangan Saya',    'sub'=>'1 lapangan aktif'],
+                ['href'=>'/owner/fields',         'icon'=>'map-pin',    'title'=>'Kelola Lapangan Saya',    'sub'=> $stats['total_lapangan'] . ' lapangan aktif'],
                 ['href'=>'/owner/schedules',       'icon'=>'calendar-days','title'=>'Kelola Jadwal & Slot', 'sub'=>'Atur slot besok'],
-                ['href'=>'/owner/verify-booking',  'icon'=>'shield-check','title'=>'Verifikasi Booking',    'sub'=>'4 menunggu'],
+                ['href'=>'/owner/verify-booking',  'icon'=>'shield-check','title'=>'Verifikasi Booking',    'sub'=> $stats['menunggu_verifikasi'] . ' menunggu'],
             ] as $link)
             <a href="{{ $link['href'] }}" style="text-decoration:none;">
                 <div class="card" style="padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;

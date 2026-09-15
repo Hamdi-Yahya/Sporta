@@ -16,7 +16,7 @@ class VerifikasiBookingController extends Controller
     {
         $lapanganIds = Lapangan::where('owner_id', Auth::id())->pluck('id');
 
-        $status = $request->get('status', Booking::STATUS_MENUNGGU_VERIFIKASI);
+        $status = $request->input('status', Booking::STATUS_MENUNGGU_VERIFIKASI);
 
         $bookings = Booking::with(['slot.lapangan', 'user', 'pembayaran'])
             ->whereHas('slot', fn($q) => $q->whereIn('lapangan_id', $lapanganIds))

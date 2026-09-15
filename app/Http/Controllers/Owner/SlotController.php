@@ -10,12 +10,13 @@ use Illuminate\Support\Facades\Auth;
 
 class SlotController extends Controller
 {
-    /** Daftar slot per lapangan milik Owner (FR-B4) */
+    /** Daftar slot per lapangan milik Owner, difilter tanggal (FR-B4) */
     public function index(Request $request)
     {
         $lapangans = Lapangan::where('owner_id', Auth::id())->approved()->get();
 
         $selectedLapangan = null;
+        $selectedTanggal = $request->input('tanggal', now()->toDateString());
         $slots = collect();
 
         if ($request->filled('lapangan_id')) {
@@ -23,13 +24,14 @@ class SlotController extends Controller
                 ->where('id', $request->lapangan_id)
                 ->firstOrFail();
 
+            // Query slot berdasarkan lapangan DAN tanggal yang dipilih
             $slots = Slot::where('lapangan_id', $selectedLapangan->id)
-                ->orderBy('tanggal')
+                ->whereDate('tanggal', $selectedTanggal)
                 ->orderBy('jam_mulai')
                 ->get();
         }
 
-        return view('owner.schedules', compact('lapangans', 'selectedLapangan', 'slots'));
+        return view('owner.schedules', compact('lapangans', 'selectedLapangan', 'selectedTanggal', 'slots'));
     }
 
     /** Buat slot baru — biasa atau open_match (FR-B4, B5) */
@@ -57,8 +59,10 @@ class SlotController extends Controller
 
         Slot::create($validated);
 
-        return redirect()->route('owner.schedules', ['lapangan_id' => $lapangan->id])
-            ->with('success', 'Slot jadwal berhasil ditambahkan.');
+        return redirect()->route('owner.schedules', [
+            'lapangan_id' => $lapangan->id,
+            'tanggal'     => $validated['tanggal'],
+        ])->with('success', 'Slot jadwal berhasil ditambahkan.');
     }
 
     /** Update slot yang belum dibooking (FR-B6) */
@@ -84,20 +88,25 @@ class SlotController extends Controller
 
         $slot->update($validated);
 
-        return redirect()->route('owner.schedules', ['lapangan_id' => $lapangan->id])
-            ->with('success', 'Slot berhasil diperbarui.');
+        return redirect()->route('owner.schedules', [
+            'lapangan_id' => $lapangan->id,
+            'tanggal'     => $validated['tanggal'],
+        ])->with('success', 'Slot berhasil diperbarui.');
     }
 
     /** Hapus slot yang belum dibooking (FR-B6) */
     public function destroy(Slot $slot)
     {
         $lapangan = $slot->lapangan;
+        $tanggal = $slot->tanggal->toDateString();
         abort_unless($lapangan->owner_id === Auth::id(), 403);
         abort_unless($slot->status === 'tersedia', 403, 'Slot yang sudah dibooking tidak dapat dihapus.');
 
         $slot->delete();
 
-        return redirect()->route('owner.schedules', ['lapangan_id' => $lapangan->id])
-            ->with('success', 'Slot berhasil dihapus.');
+        return redirect()->route('owner.schedules', [
+            'lapangan_id' => $lapangan->id,
+            'tanggal'     => $tanggal,
+        ])->with('success', 'Slot berhasil dihapus.');
     }
 }

@@ -100,8 +100,12 @@
                         <input type="tel" id="phone" name="phone" class="form-input"
                                style="padding-left:38px;"
                                placeholder="08xxxxxxxxxx" required
-                               value="{{ old('phone') }}">
+                               inputmode="numeric" maxlength="12"
+                               value="{{ old('phone') }}"
+                               oninput="validatePhone()">
                     </div>
+                    <div id="phone-error" style="font-size:0.75rem;color:#DC2626;margin-top:4px;display:none;"></div>
+                    @error('phone')<div style="font-size:0.75rem;color:#DC2626;margin-top:4px;">{{ $message }}</div>@enderror
                 </div>
 
                 {{-- Email --}}
@@ -127,13 +131,21 @@
                         </span>
                         <input type="password" id="reg-password" name="password" class="form-input"
                                style="padding-left:38px;"
-                               placeholder="Min. 8 karakter" required minlength="8">
+                               placeholder="Min. 8 karakter" required minlength="8"
+                               oninput="validatePassword()">
                         <button type="button" onclick="togglePass('reg-password','reg-icon')"
                                 style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
                                        background:none;border:none;cursor:pointer;color:#94A3B8;">
                             <i id="reg-icon" data-lucide="eye" style="width:16px;height:16px;"></i>
                         </button>
                     </div>
+                    <div id="pw-hints" style="font-size:0.75rem;margin-top:6px;display:none;">
+                        <div id="pw-len" style="color:#DC2626;">✕ Minimal 8 karakter</div>
+                        <div id="pw-letter" style="color:#DC2626;">✕ Mengandung huruf</div>
+                        <div id="pw-number" style="color:#DC2626;">✕ Mengandung angka</div>
+                        <div id="pw-special" style="color:#DC2626;">✕ Mengandung karakter khusus (!@#$%^&* dll)</div>
+                    </div>
+                    @error('password')<div style="font-size:0.75rem;color:#DC2626;margin-top:4px;">{{ $message }}</div>@enderror
                 </div>
 
                 {{-- Konfirmasi Password --}}
@@ -145,8 +157,11 @@
                         </span>
                         <input type="password" id="password_confirmation" name="password_confirmation"
                                class="form-input" style="padding-left:38px;"
-                               placeholder="Ulangi password" required>
+                               placeholder="Ulangi password" required
+                               oninput="validateConfirmPassword()">
                     </div>
+                    <div id="pw-confirm-error" style="font-size:0.75rem;color:#DC2626;margin-top:4px;display:none;"></div>
+                    @error('password_confirmation')<div style="font-size:0.75rem;color:#DC2626;margin-top:4px;">{{ $message }}</div>@enderror
                 </div>
 
                 {{-- Nama Usaha (Owner only) --}}
@@ -261,6 +276,60 @@
             icon.setAttribute('data-lucide', 'eye');
         }
         lucide.createIcons();
+    }
+
+    /* Validasi real-time Nomor HP: hanya angka, tepat 12 digit */
+    function validatePhone() {
+        const input = document.getElementById('phone');
+        const err   = document.getElementById('phone-error');
+        // Strip semua non-digit saat mengetik
+        input.value = input.value.replace(/\D/g, '');
+        const val = input.value;
+
+        if (val.length === 0) {
+            err.style.display = 'none';
+        } else if (val.length !== 12) {
+            err.textContent = 'Nomor HP harus tepat 12 digit angka.';
+            err.style.display = 'block';
+        } else {
+            err.style.display = 'none';
+        }
+    }
+
+    /* Validasi real-time Password: min 8, huruf + angka + karakter khusus */
+    function validatePassword() {
+        const val = document.getElementById('reg-password').value;
+        const hints = document.getElementById('pw-hints');
+        hints.style.display = val.length > 0 ? 'block' : 'none';
+
+        setHint('pw-len',     val.length >= 8);
+        setHint('pw-letter',  /[a-zA-Z]/.test(val));
+        setHint('pw-number',  /[0-9]/.test(val));
+        setHint('pw-special', /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/~`]/.test(val));
+
+        validateConfirmPassword();
+    }
+
+    function setHint(id, pass) {
+        const el = document.getElementById(id);
+        el.style.color = pass ? '#16A34A' : '#DC2626';
+        el.textContent = (pass ? '✓ ' : '✕ ') + el.textContent.substring(2);
+    }
+
+    /* Validasi real-time Konfirmasi Password */
+    function validateConfirmPassword() {
+        const pw   = document.getElementById('reg-password').value;
+        const conf = document.getElementById('password_confirmation').value;
+        const err  = document.getElementById('pw-confirm-error');
+
+        if (conf.length === 0) {
+            err.style.display = 'none';
+        } else if (pw !== conf) {
+            err.textContent = 'Konfirmasi password tidak cocok.';
+            err.style.display = 'block';
+        } else {
+            err.style.display = 'none';
+        }
     }
 </script>
 @endpush

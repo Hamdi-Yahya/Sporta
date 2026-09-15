@@ -14,9 +14,11 @@
 @php
 $bookedCount = 0;
 $availableCount = 0;
-if (isset($slots)) {
+$openMatchCount = 0;
+if (isset($slots) && $slots->count() > 0) {
     $bookedCount = $slots->whereIn('status', ['dibooking', 'penuh'])->count();
     $availableCount = $slots->where('status', 'tersedia')->count();
+    $openMatchCount = $slots->where('tipe', 'open_match')->count();
 }
 @endphp
 
@@ -39,7 +41,7 @@ if (isset($slots)) {
     <div>
         <label class="form-label" style="margin-bottom:4px;">Tanggal</label>
         <input type="date" name="tanggal" class="form-input" 
-               value="{{ request('tanggal', now()->toDateString()) }}" 
+               value="{{ $selectedTanggal }}" 
                style="width:auto;"
                onchange="this.form.submit()">
     </div>
@@ -142,9 +144,19 @@ if (isset($slots)) {
         @endforeach
     @else
         <div style="grid-column:1/-1;text-align:center;padding:48px 24px;background:#F8FAFC;border-radius:10px;border:1px dashed #E2E8F0;">
-            <p style="font-size:0.9375rem;color:#64748B;margin:0;">
-                {{ $selectedLapangan ? 'Belum ada jadwal slot untuk tanggal ini.' : 'Pilih lapangan terlebih dahulu.' }}
-            </p>
+            <i data-lucide="calendar-off" style="width:36px;height:36px;color:#94A3B8;margin-bottom:10px;opacity:0.6;"></i>
+            @if($selectedLapangan)
+                <p style="font-size:0.9375rem;color:#64748B;margin:0 0 8px;">
+                    Belum ada slot untuk tanggal ini.
+                </p>
+                <p style="font-size:0.8125rem;color:#94A3B8;margin:0;">
+                    Klik <strong>+ Tambah Slot</strong> di atas untuk membuat jadwal baru.
+                </p>
+            @else
+                <p style="font-size:0.9375rem;color:#64748B;margin:0;">
+                    Pilih lapangan terlebih dahulu untuk melihat slot.
+                </p>
+            @endif
         </div>
     @endif
 </div>
@@ -168,7 +180,7 @@ if (isset($slots)) {
         <form method="POST" action="{{ route('owner.schedules.store') }}">
         @csrf
         <input type="hidden" name="lapangan_id" value="{{ $selectedLapangan->id }}">
-        <input type="hidden" name="tanggal" value="{{ request('tanggal', now()->toDateString()) }}">
+        <input type="hidden" name="tanggal" value="{{ $selectedTanggal }}">
         <div style="padding:22px;display:flex;flex-direction:column;gap:14px;">
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
