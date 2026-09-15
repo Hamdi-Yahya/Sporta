@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'SPORTA')
-@section('meta_description', 'SPORTA — Platform Digital Booking Lapangan, Cari Partner & Komunitas Olahraga Kota Pekalongan. Satu platform untuk semua kebutuhan olahraga kamu.')
+@section('meta_description', 'SPORTA Platform Digital Booking Lapangan, Cari Partner & Komunitas Olahraga Kota Pekalongan. Satu platform untuk semua kebutuhan olahraga kamu.')
 
 @section('content')
 
@@ -51,7 +51,7 @@
                 </h1>
 
                 <p style="font-size:1.0625rem;color:#A7F3D0;line-height:1.7;margin:0 0 36px;max-width:480px;">
-                    Booking lapangan, cari partner main, dan gabung komunitas olahraga —
+                    Booking lapangan, cari partner main, dan gabung komunitas olahraga
                     semuanya dalam satu platform digital untuk pemuda Pekalongan.
                 </p>
 
@@ -380,24 +380,53 @@
 {{-- ═══════════════════════════════════════════════════════════
      FOOTER
 ═══════════════════════════════════════════════════════════ --}}
-<footer style="background:#1E293B;padding:36px 0 24px;">
+<footer style="background:#0F2E1C;padding:64px 0 32px;border-top:1px solid rgba(255,255,255,0.05);">
     <div style="max-width:1280px;margin:0 auto;padding:0 24px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-                <img src="{{ asset('images/sportweb.png') }}" alt="SPORTA Logo" style="height:30px; object-fit:contain;">
+        <div class="footer-grid" style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;margin-bottom:48px;">
+            {{-- Brand & About --}}
+            <div>
+                <img src="{{ asset('images/sportweb.png') }}" alt="SPORTA Logo" style="height:36px; object-fit:contain; margin-bottom:20px;">
+                <p style="font-size:0.9375rem;color:#A7F3D0;line-height:1.7;margin:0 0 20px;max-width:340px;">
+                    Booking lapangan, cari partner main, dan gabung komunitas olahraga dalam satu platform digital untuk pemuda Pekalongan.
+                </p>
+                <div style="display:inline-block;background:rgba(22,163,74,0.15);border:1px solid rgba(22,163,74,0.3);padding:6px 12px;border-radius:4px;">
+                    <p style="font-size:0.75rem;font-weight:600;color:#4ADE80;letter-spacing:0.05em;margin:0;">
+                        JAMBORE PEMUDA 2026 &mdash; DINPARBUDPORA
+                    </p>
+                </div>
             </div>
-            <p style="font-size:0.8125rem;color:#64748B;text-align:right;">
-                Platform Olahraga Digital Kota Pekalongan<br>
-                Jambore Pemuda 2026 — DINPARBUDPORA
-            </p>
+            
+            {{-- Quick Links --}}
+            <div>
+                <h4 style="font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;color:#fff;margin:0 0 20px;">Menu Utama</h4>
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                    <a href="#lapangan-populer" style="font-size:0.875rem;color:#86EFAC;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#86EFAC'">Cari Lapangan</a>
+                    <a href="#fitur" style="font-size:0.875rem;color:#86EFAC;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#86EFAC'">Fitur SPORTA</a>
+                    <a href="#komunitas" style="font-size:0.875rem;color:#86EFAC;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#86EFAC'">Komunitas Olahraga</a>
+                </div>
+            </div>
+
+            {{-- Support & Legal --}}
+            <div>
+                <h4 style="font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;color:#fff;margin:0 0 20px;">Bantuan & Legal</h4>
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                    <a href="#" style="font-size:0.875rem;color:#86EFAC;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#86EFAC'">Pusat Bantuan</a>
+                    <a href="#" style="font-size:0.875rem;color:#86EFAC;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#86EFAC'">Syarat & Ketentuan</a>
+                    <a href="#" style="font-size:0.875rem;color:#86EFAC;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#86EFAC'">Kebijakan Privasi</a>
+                </div>
+            </div>
         </div>
-        <div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:20px;
-                    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-            <p style="font-size:0.8rem;color:#475569;margin:0;">© 2026 SPORTA. Karya Putra-Putri Kota Pekalongan.</p>
-            <div style="display:flex;gap:20px;">
-                <a href="#" style="font-size:0.8rem;color:#475569;text-decoration:none;">Tentang</a>
-                <a href="#" style="font-size:0.8rem;color:#475569;text-decoration:none;">Syarat & Ketentuan</a>
-                <a href="#" style="font-size:0.8rem;color:#475569;text-decoration:none;">Kontak</a>
+
+        {{-- Bottom Copyright --}}
+        <div style="border-top:1px solid rgba(22,163,74,0.2);padding-top:24px;
+                    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+            <p style="font-size:0.875rem;color:#6EE7B7;margin:0;">
+                &copy; {{ date('Y') }} SPORTA. Karya Putra-Putri Kota Pekalongan.
+            </p>
+            <div style="display:flex;gap:16px;">
+                <a href="#" style="color:#6EE7B7;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6EE7B7'"><i data-lucide="instagram" style="width:20px;height:20px;"></i></a>
+                <a href="#" style="color:#6EE7B7;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6EE7B7'"><i data-lucide="facebook" style="width:20px;height:20px;"></i></a>
+                <a href="#" style="color:#6EE7B7;transition:color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#6EE7B7'"><i data-lucide="twitter" style="width:20px;height:20px;"></i></a>
             </div>
         </div>
     </div>
@@ -467,12 +496,9 @@
     }
 
     /* Footer */
-    footer > div > div:first-child {
-        flex-direction: column !important;
-        gap: 12px !important;
-    }
-    footer > div > div:first-child > p {
-        text-align: left !important;
+    .footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 32px !important;
     }
 }
 
