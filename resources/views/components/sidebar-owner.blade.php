@@ -34,6 +34,15 @@
         </a>
     </li>
 
+    {{-- Kelola Booking Offline --}}
+    <li>
+        <a href="/owner/booking-offline"
+           class="sidebar-link {{ str_starts_with($current, 'owner.booking-offline') ? 'active' : '' }}">
+            <i data-lucide="calendar-off" style="width:17px;height:17px;flex-shrink:0;"></i>
+            <span>Booking Offline</span>
+        </a>
+    </li>
+
     {{-- Verifikasi Booking --}}
     <li>
         <a href="/owner/verify-booking"

@@ -11,6 +11,7 @@ class Booking extends Model
     protected $fillable = [
         'slot_id', 'user_id', 'tipe_booking', 'jumlah_kursi',
         'total_harga', 'status', 'waktu_booking', 'batas_waktu_bayar',
+        'sumber_booking', 'nama_pemesan_offline', 'no_hp_pemesan_offline', 'catatan_offline'
     ];
 
     protected function casts(): array

@@ -57,6 +57,15 @@
                  title="Klik untuk lihat bukti transfer full size">
                 <img src="{{ asset('storage/' . $b->pembayaran->bukti_transfer) }}" alt="Bukti" style="width:100%;height:100%;object-fit:cover;">
             </a>
+            @elseif($b->sumber_booking === 'offline')
+            <div style="width:100px;height:80px;border-radius:8px;background:#F1F5F9;
+                        border:2px dashed #CBD5E1;display:flex;align-items:center;
+                        justify-content:center;flex-shrink:0;">
+                <div style="text-align:center;">
+                    <i data-lucide="store" style="width:22px;height:22px;color:#94A3B8;"></i>
+                    <div style="font-size:0.625rem;color:#94A3B8;margin-top:3px;">Walk-in</div>
+                </div>
+            </div>
             @else
             <div style="width:100px;height:80px;border-radius:8px;background:#F1F5F9;
                         border:2px dashed #CBD5E1;display:flex;align-items:center;
@@ -72,15 +81,18 @@
             <div style="flex:1;">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:12px;flex-wrap:wrap;">
                     <div>
-                        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:0.9375rem;color:#1E293B;margin-bottom:3px;">
-                            {{ $b->user->name }}
+                        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:0.9375rem;color:#1E293B;margin-bottom:3px;display:flex;align-items:center;gap:6px;">
+                            {{ $b->sumber_booking === 'offline' ? $b->nama_pemesan_offline : $b->user->name }}
+                            @if($b->sumber_booking === 'offline')
+                            <span style="font-size:0.65rem;background:#475569;color:#fff;padding:2px 6px;border-radius:4px;font-weight:600;">OFFLINE</span>
+                            @endif
                             <span style="font-weight:400;font-size:0.8125rem;color:#64748B;margin-left:4px;">
                                 · {{ $idStr }}
                             </span>
                         </div>
                         <div style="font-size:0.8125rem;color:#64748B;margin-bottom:6px;">
                             <i data-lucide="smartphone" style="width:12px;height:12px;display:inline;"></i>
-                            {{ $b->user->no_hp ?? '-' }}
+                            {{ $b->sumber_booking === 'offline' ? ($b->no_hp_pemesan_offline ?? '-') : ($b->user->no_hp ?? '-') }}
                             <span style="margin:0 6px;color:#CBD5E1;">•</span>
                             <span style="color:{{ $b->tipe_booking === 'biasa' ? '#64748B' : '#EA580C' }};font-weight:{{ $b->tipe_booking === 'biasa' ? '400' : '600' }};">
                                 {{ $jenisBooking }}

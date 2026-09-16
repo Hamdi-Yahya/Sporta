@@ -80,7 +80,12 @@
                 <tbody>
                     @forelse($recentBookings as $bk)
                     <tr style="border-bottom:1px solid #F1F5F9;">
-                        <td style="padding:10px 14px;font-weight:600;color:#1E293B;">{{ $bk->user->name }}</td>
+                        <td style="padding:10px 14px;font-weight:600;color:#1E293B;">
+                            {{ $bk->sumber_booking === 'offline' ? $bk->nama_pemesan_offline : $bk->user->name }}
+                            @if($bk->sumber_booking === 'offline')
+                            <span style="font-size:0.55rem;background:#475569;color:#fff;padding:1px 4px;border-radius:3px;font-weight:600;margin-left:4px;">OFFLINE</span>
+                            @endif
+                        </td>
                         <td style="padding:10px 14px;color:#475569;">
                             {{ \Carbon\Carbon::parse($bk->slot->tanggal)->translatedFormat('d M Y') }}<br>
                             <span style="font-size:0.75rem;color:#94A3B8;">{{ \Carbon\Carbon::parse($bk->slot->jam_mulai)->format('H:i') }} – {{ \Carbon\Carbon::parse($bk->slot->jam_selesai)->format('H:i') }}</span>

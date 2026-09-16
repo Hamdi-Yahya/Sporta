@@ -10,6 +10,7 @@ use App\Http\Controllers\Player\RatingController;
 use App\Http\Controllers\Owner\LapanganController;
 use App\Http\Controllers\Owner\SlotController;
 use App\Http\Controllers\Owner\VerifikasiBookingController;
+use App\Http\Controllers\Owner\BookingOfflineController;
 use App\Http\Controllers\Admin\LapanganApprovalController;
 use App\Http\Controllers\KomunitasController;
 use App\Http\Controllers\NotifikasiController;
@@ -120,6 +121,10 @@ Route::prefix('owner')->name('owner.')->middleware(['auth', 'role:owner'])->grou
     Route::post('/schedules',           [SlotController::class, 'store'])->name('schedules.store');
     Route::put('/schedules/{slot}',     [SlotController::class, 'update'])->name('schedules.update');
     Route::delete('/schedules/{slot}',  [SlotController::class, 'destroy'])->name('schedules.destroy');
+
+    // Kelola Booking Offline
+    Route::get('/booking-offline',      [BookingOfflineController::class, 'index'])->name('booking-offline');
+    Route::post('/booking-offline',     [BookingOfflineController::class, 'store'])->name('booking-offline.store');
 
     // Verifikasi Booking (FR-D1–D5)
     Route::get('/verify-booking',       [VerifikasiBookingController::class, 'index'])->name('verify-booking');
