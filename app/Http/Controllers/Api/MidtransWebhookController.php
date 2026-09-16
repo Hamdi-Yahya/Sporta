@@ -31,28 +31,21 @@ class MidtransWebhookController extends Controller
         $transactionStatus = $payload['transaction_status'] ?? '';
         $fraudStatus = $payload['fraud_status'] ?? '';
         
-        $pembayaran = Pembayaran::where('order_id', $orderId)->first();
-        
-        if (!$pembayaran) {
-            Log::error('Midtrans Webhook: Order ID not found', ['order_id' => $orderId]);
-            return response()->json(['message' => 'Order not found'], 404);
-        }
+        // order_id format: SPORTA-{booking_id}-{random}
+        $orderParts = explode('-', $orderId);
+        $bookingId = $orderParts[1] ?? null;
 
-        $booking = $pembayaran->booking;
+        $booking = Booking::find($bookingId);
+        
+        if (!$booking) {
+            Log::error('Midtrans Webhook: Booking not found', ['order_id' => $orderId]);
+            return response()->json(['message' => 'Booking not found'], 404);
+        }
 
         // Idempotency: Jika status sudah terkonfirmasi, expired, atau ditolak, abaikan
         if (in_array($booking->status, [Booking::STATUS_TERKONFIRMASI, Booking::STATUS_EXPIRED, Booking::STATUS_DITOLAK, Booking::STATUS_SELESAI])) {
             return response()->json(['message' => 'Webhook already processed']);
         }
-
-        // Update record pembayaran
-        $pembayaran->update([
-            'transaction_id'     => $payload['transaction_id'] ?? null,
-            'payment_type'       => $payload['payment_type'] ?? null,
-            'transaction_status' => $transactionStatus,
-            'fraud_status'       => $fraudStatus,
-            'paid_at'            => in_array($transactionStatus, ['settlement', 'capture']) ? now() : null,
-        ]);
 
         // Tangani berdasarkan status transaksi
         if ($transactionStatus == 'capture') {
