@@ -44,7 +44,7 @@
 }
 </style>
 
-<div class="community-chat-layout" style="display:grid;grid-template-columns:300px 1fr;gap:0;height:calc(100vh - 140px);
+<div class="community-chat-layout" style="display:grid;grid-template-columns:300px 1fr;gap:0;height:75vh;min-height:500px;
             border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;background:#fff;">
 
     <div class="community-chat-sidebar" style="width:300px;border-right:1px solid #E2E8F0;display:flex;flex-direction:column;background:#fff;border-top-left-radius:10px;border-bottom-left-radius:10px;">
@@ -214,7 +214,7 @@
                 appendMessage({
                     user_id: data.pesan.user_id,
                     isi_pesan: data.pesan.isi_pesan,
-                    waktu_kirim: new Date(data.pesan.waktu_kirim).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}),
+                    waktu_kirim: new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}),
                     user: data.pesan.user
                 }, true);
             }
@@ -259,6 +259,29 @@
         chatBox.appendChild(div);
         scrollToBottom();
     }
+
+    // Fungsi polling untuk menarik pesan baru setiap 3 detik 
+    // Berguna agar tidak perlu refresh halaman manual
+    setInterval(async () => {
+        try {
+            const res = await fetch(window.location.href);
+            const text = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            const newChatHtml = doc.getElementById('chat-messages').innerHTML;
+            
+            const currentChat = document.getElementById('chat-messages');
+            // Jika ada perubahan konten chat
+            if (currentChat.innerHTML.trim() !== newChatHtml.trim()) {
+                const isAtBottom = currentChat.scrollHeight - currentChat.scrollTop <= currentChat.clientHeight + 50;
+                currentChat.innerHTML = newChatHtml;
+                // Tetap scroll bawah kalau user sebelumnya memang ada di bawah
+                if (isAtBottom) scrollToBottom();
+            }
+        } catch (e) {
+            console.error('Gagal memuat pesan otomatis', e);
+        }
+    }, 3000);
 </script>
 @endpush
 

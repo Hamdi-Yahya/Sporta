@@ -229,8 +229,8 @@ if (isset($slots) && $slots->count() > 0) {
 
             {{-- Open Match fields (FR-B5) --}}
             <div id="om-fields" style="display:none;">
-                <label class="form-label">Kuota Pemain</label>
-                <input type="number" name="kuota_total" id="slot-quota" class="form-input" placeholder="10" min="2"
+                <label class="form-label">Jumlah Maksimal Pemain (Berapa Orang)</label>
+                <input type="number" name="kuota_total" id="slot-quota" class="form-input" placeholder="Misal: 4 (Bulu Tangkis) atau 10 (Futsal)" min="2"
                        oninput="calcPerSeat()">
                 <div id="per-seat-label" style="font-size:0.8125rem;color:#EA580C;margin-top:6px;display:none;">
                     Harga per kursi: <strong id="per-seat-val">–</strong>

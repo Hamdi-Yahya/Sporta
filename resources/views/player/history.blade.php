@@ -68,13 +68,23 @@ $activeStatus = request('status', '');
             </div>
         </div>
 
-        <div style="display:flex;gap:16px;font-size:0.8125rem;color:#64748B;margin-bottom:12px;flex-wrap:wrap;">
-            <span style="display:flex;align-items:center;gap:4px;">
-                <i data-lucide="calendar" style="width:13px;height:13px;"></i>{{ $tglStr }}
-            </span>
-            <span style="display:flex;align-items:center;gap:4px;">
-                <i data-lucide="clock" style="width:13px;height:13px;"></i>{{ $waktuStr }}
-            </span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;gap:16px;font-size:0.8125rem;color:#64748B;flex-wrap:wrap;">
+                <span style="display:flex;align-items:center;gap:4px;">
+                    <i data-lucide="calendar" style="width:13px;height:13px;"></i>{{ $tglStr }}
+                </span>
+                <span style="display:flex;align-items:center;gap:4px;">
+                    <i data-lucide="clock" style="width:13px;height:13px;"></i>{{ $waktuStr }}
+                </span>
+            </div>
+            
+            @if(in_array($b->status, ['terkonfirmasi', 'selesai']))
+            <button type="button" onclick="showReceipt('{{ $idBooking }}', '{{ addslashes(Auth::user()->name) }}', '{{ addslashes($lapangan->nama) }}', '{{ addslashes($lapangan->cabangOlahraga->nama_cabor) }}', '{{ $tglStr }}', '{{ $waktuStr }}', '{{ number_format($b->total_harga, 0, ',', '.') }}', 'Lunas', '{{ ucfirst($b->status) }}')" 
+                    class="btn-outline btn-sm" 
+                    style="display:flex;align-items:center;gap:5px;padding:4px 10px;font-size:0.75rem;cursor:pointer;">
+                <i data-lucide="receipt" style="width:14px;height:14px;"></i> Bukti Booking
+            </button>
+            @endif
         </div>
 
         {{-- Rating section — muncul jika status = selesai (FR-I1) --}}
@@ -144,6 +154,59 @@ $activeStatus = request('status', '');
     </div>
 </div>
 
+{{-- ─── Modal Nota Booking ─── --}}
+<div id="receipt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:#fff;width:100%;max-width:400px;border-radius:12px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.15);">
+        <div id="receipt-content" style="padding:24px;">
+            <div style="text-align:center;border-bottom:2px dashed #E2E8F0;padding-bottom:16px;margin-bottom:16px;">
+                <h2 style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.5rem;color:#16A34A;margin:0;">SPORTA</h2>
+                <div style="font-size:0.8125rem;color:#64748B;margin-top:4px;font-weight:600;">BUKTI PEMESANAN LAPANGAN</div>
+            </div>
+            
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.875rem;">
+                <span style="color:#64748B;">No. Booking</span>
+                <strong id="rcpt-id" style="color:#1E293B;">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.875rem;">
+                <span style="color:#64748B;">Nama Pemesan</span>
+                <strong id="rcpt-name" style="color:#1E293B;text-align:right;">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.875rem;">
+                <span style="color:#64748B;">Lapangan</span>
+                <strong id="rcpt-field" style="color:#1E293B;text-align:right;max-width:180px;">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.875rem;">
+                <span style="color:#64748B;">Cabang Olahraga</span>
+                <strong id="rcpt-sport" style="color:#1E293B;">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.875rem;">
+                <span style="color:#64748B;">Jadwal</span>
+                <strong id="rcpt-date" style="color:#1E293B;text-align:right;">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.875rem;">
+                <span style="color:#64748B;">Status Pemb.</span>
+                <strong id="rcpt-paystatus" style="color:#166534;">-</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:16px;font-size:0.875rem;">
+                <span style="color:#64748B;">Status Booking</span>
+                <strong id="rcpt-bookstatus" style="color:#16A34A;">-</strong>
+            </div>
+            
+            <div style="border-top:2px dashed #E2E8F0;padding-top:16px;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:0.9375rem;font-weight:600;color:#1E293B;">Total Bayar</span>
+                <strong id="rcpt-total" style="font-size:1.125rem;color:#166534;font-family:'Poppins',sans-serif;">-</strong>
+            </div>
+        </div>
+        
+        <div style="padding:16px 24px;background:#F8FAFC;display:flex;gap:12px;justify-content:space-between;border-top:1px solid #E2E8F0;">
+            <button type="button" onclick="document.getElementById('receipt-modal').style.display='none'" class="btn-outline" style="flex:1;cursor:pointer;background:#fff;">Tutup</button>
+            <button type="button" onclick="printReceipt()" class="btn-brand" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;">
+                <i data-lucide="printer" style="width:16px;height:16px;"></i> Cetak Nota
+            </button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
     const ratings = {};
@@ -164,6 +227,47 @@ $activeStatus = request('status', '');
             icon.style.fill  = i <= star ? '#F59E0B' : 'transparent';
         }
         lucide.createIcons();
+    }
+
+    /* Tampilkan modal Nota Booking */
+    function showReceipt(id, name, field, sport, date, time, total, paystatus, bookstatus) {
+        document.getElementById('rcpt-id').innerText = id;
+        document.getElementById('rcpt-name').innerText = name;
+        document.getElementById('rcpt-field').innerText = field;
+        document.getElementById('rcpt-sport').innerText = sport;
+        document.getElementById('rcpt-date').innerText = date + ', ' + time;
+        document.getElementById('rcpt-paystatus').innerText = paystatus;
+        document.getElementById('rcpt-bookstatus').innerText = bookstatus;
+        document.getElementById('rcpt-total').innerText = 'Rp ' + total;
+        
+        document.getElementById('receipt-modal').style.display = 'flex';
+    }
+
+    /* Cetak area nota saja */
+    function printReceipt() {
+        const printContent = document.getElementById('receipt-content').innerHTML;
+        const printWindow = window.open('', '_blank', 'height=600,width=450');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Bukti Booking SPORTA</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1E293B; background: #fff; }
+                    .print-container { max-width: 400px; margin: 0 auto; border: 1px solid #E2E8F0; border-radius: 8px; padding: 24px; }
+                    * { box-sizing: border-box; }
+                </style>
+            </head>
+            <body>
+                <div class="print-container">
+                    ${printContent}
+                </div>
+                <script>
+                    window.onload = function() { window.print(); window.close(); }
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
     }
 </script>
 @endpush
