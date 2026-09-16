@@ -13,16 +13,16 @@ class MidtransWebhookController extends Controller
     public function handle(Request $request)
     {
         $payload = $request->all();
-        
+
         $serverKey = config('midtrans.server_key');
         $orderId = $payload['order_id'] ?? '';
         $statusCode = $payload['status_code'] ?? '';
         $grossAmount = $payload['gross_amount'] ?? '';
         $signatureKey = $payload['signature_key'] ?? '';
-        
+
         // Verifikasi signature
         $calculatedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-        
+
         if ($calculatedSignature !== $signatureKey) {
             Log::error('Midtrans Webhook: Invalid Signature', ['order_id' => $orderId]);
             return response()->json(['message' => 'Invalid signature'], 403);
@@ -30,16 +30,21 @@ class MidtransWebhookController extends Controller
 
         $transactionStatus = $payload['transaction_status'] ?? '';
         $fraudStatus = $payload['fraud_status'] ?? '';
-        
+
         // order_id format: SPORTA-{booking_id}-{random}
         $orderParts = explode('-', $orderId);
         $bookingId = $orderParts[1] ?? null;
 
         $booking = Booking::find($bookingId);
-        
+
         if (!$booking) {
-            Log::error('Midtrans Webhook: Booking not found', ['order_id' => $orderId]);
-            return response()->json(['message' => 'Booking not found'], 404);
+            Log::warning('Midtrans Webhook: Booking not found', [
+                'order_id' => $orderId
+            ]);
+
+            return response()->json([
+                'message' => 'Notification received'
+            ], 200);
         }
 
         // Idempotency: Jika status sudah terkonfirmasi, expired, atau ditolak, abaikan
