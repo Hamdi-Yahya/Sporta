@@ -40,9 +40,9 @@ $notifications = [
                 </div>
                 <div>
                     <h2 style="font-family:'Poppins',sans-serif;font-size:1.125rem;font-weight:700;
-                               color:#1E293B;margin:0 0 4px;">Futsal Planet Pekalongan</h2>
+                               color:#1E293B;margin:0 0 4px;">{{ $user->nama_usaha ?? 'Nama Usaha Belum Diatur' }}</h2>
                     <p style="font-size:0.8125rem;color:#64748B;margin:0 0 6px;">
-                        Satrio Wibowo · satrio@email.com
+                        {{ $user->name }} · {{ $user->email }}
                     </p>
                     <span class="badge badge-success">
                         <i data-lucide="shield-check" style="width:10px;height:10px;"></i>
@@ -73,9 +73,9 @@ $notifications = [
                        color:#1E293B;margin:0 0 18px;">Edit Profil Usaha</h3>
             <div style="display:flex;flex-direction:column;gap:14px;">
                 @foreach([
-                    ['Nama Pemilik',          'Satrio Wibowo',              'text',  'user'],
-                    ['Nama Usaha/Lapangan',   'Futsal Planet Pekalongan',   'text',  'building-2'],
-                    ['No. HP / WhatsApp',     '08119876543',                'tel',   'smartphone'],
+                    ['Nama Pemilik',          $user->name,              'text',  'user'],
+                    ['Nama Usaha/Lapangan',   $user->nama_usaha ?? 'Nama Usaha Belum Diatur',   'text',  'building-2'],
+                    ['No. HP / WhatsApp',     $user->no_telp ?? '-',                'tel',   'smartphone'],
                     ['Rekening Bank',         'BRI - 1234-5678-9012',       'text',  'credit-card'],
                 ] as $field)
                 <div>
@@ -92,7 +92,7 @@ $notifications = [
 
                 <div>
                     <label class="form-label">Email (tidak dapat diubah)</label>
-                    <input type="email" class="form-input" value="satrio@email.com"
+                    <input type="email" class="form-input" value="{{ $user->email }}"
                            style="background:#F8FAFC;color:#94A3B8;" readonly>
                 </div>
 
@@ -161,7 +161,7 @@ $notifications = [
                 <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;color:#1E293B;">
                     BRI — 1234-5678-9012
                 </div>
-                <div style="font-size:0.8125rem;color:#64748B;">a.n. Satrio Wibowo</div>
+                <div style="font-size:0.8125rem;color:#64748B;">a.n. {{ $user->name }}</div>
             </div>
         </div>
     </div>

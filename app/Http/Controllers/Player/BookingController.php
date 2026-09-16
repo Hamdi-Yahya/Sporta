@@ -8,9 +8,11 @@ use App\Models\Booking;
 use App\Models\Pembayaran;
 use App\Models\Slot;
 use App\Services\NotifikasiService;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class BookingController extends Controller
 {
@@ -46,20 +48,33 @@ class BookingController extends Controller
                 $slot->update(['status' => 'dibooking']);
             }
 
+            // Buat Pembayaran record dengan snap token (Midtrans)
+            $orderId = 'SPORTA-' . $booking->id . '-' . Str::random(5);
+            $midtransService = new MidtransService();
+            $snapToken = $midtransService->getSnapToken($booking, $orderId);
+
+            Pembayaran::create([
+                'booking_id'         => $booking->id,
+                'order_id'           => $orderId,
+                'gross_amount'       => $totalHarga,
+                'transaction_status' => 'pending',
+                'snap_token'         => $snapToken,
+            ]);
+
             // Kirim notifikasi ke Owner
             NotifikasiService::kirim(
                 $slot->lapangan->owner_id,
                 'Booking Baru',
-                "Ada booking baru untuk lapangan \"{$slot->lapangan->nama}\" pada {$slot->tanggal->format('d M Y')} pukul {$slot->jam_mulai}.",
+                "Ada booking baru untuk lapangan \"{$slot->lapangan->nama}\" pada {$slot->tanggal->format('d M Y')} pukul {$slot->jam_mulai}. Menunggu pembayaran.",
                 'booking_baru',
                 $booking->id
             );
 
-            // Auto-expire setelah 30 menit jika bukti belum diupload (FR-C5)
+            // Auto-expire setelah 30 menit
             ExpireBookingJob::dispatch($booking->id)->delay(now()->addMinutes(30));
 
             return redirect()->route('player.booking.payment', $booking)
-                ->with('success', 'Booking berhasil dibuat. Silakan upload bukti transfer.');
+                ->with('success', 'Booking berhasil dibuat. Silakan selesaikan pembayaran.');
         });
     }
 
@@ -69,40 +84,11 @@ class BookingController extends Controller
         abort_unless($booking->user_id === Auth::id(), 403);
         abort_unless($booking->status === Booking::STATUS_MENUNGGU_PEMBAYARAN, 422, 'Status booking tidak valid.');
 
-        $booking->load('slot.lapangan');
+        $booking->load(['slot.lapangan', 'pembayaran']);
 
+        // Jika tidak ada token (misal karena error saat generate), kita bisa men-generate ulang di sini,
+        // namun untuk sementara asumsikan token sudah ter-generate saat store().
         return view('player.booking-payment', compact('booking'));
-    }
-
-    /** Upload bukti transfer — status → menunggu_verifikasi (FR-C6) */
-    public function uploadBukti(Request $request, Booking $booking)
-    {
-        abort_unless($booking->user_id === Auth::id(), 403);
-        abort_unless($booking->status === Booking::STATUS_MENUNGGU_PEMBAYARAN, 422, 'Status booking tidak valid.');
-
-        // Cek apakah sudah expired
-        if (now()->gt($booking->batas_waktu_bayar)) {
-            $booking->update(['status' => Booking::STATUS_EXPIRED]);
-            return redirect()->route('player.history')
-                ->with('error', 'Batas waktu upload sudah habis. Booking dibatalkan.');
-        }
-
-        $request->validate([
-            'bukti_transfer' => ['required', 'image', 'max:2048'],
-        ]);
-
-        $path = $request->file('bukti_transfer')->store('bukti_transfer', 'public');
-
-        Pembayaran::create([
-            'booking_id'     => $booking->id,
-            'bukti_transfer' => $path,
-            'waktu_upload'   => now(),
-        ]);
-
-        $booking->update(['status' => Booking::STATUS_MENUNGGU_VERIFIKASI]);
-
-        return redirect()->route('player.history')
-            ->with('success', 'Bukti transfer berhasil diunggah. Menunggu verifikasi Owner.');
     }
 
     /** Riwayat booking user — bisa difilter by status (FR-I1) */

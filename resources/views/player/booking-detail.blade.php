@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Detail Lapangan — Futsal Planet')
+@section('title', 'Detail Lapangan — ' . $lapangan->nama)
 @section('page_title', 'Detail Lapangan')
 @section('sidebar_role', 'Player')
 @section('user_initial', 'A')

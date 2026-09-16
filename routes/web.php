@@ -14,6 +14,7 @@ use App\Http\Controllers\Owner\BookingOfflineController;
 use App\Http\Controllers\Admin\LapanganApprovalController;
 use App\Http\Controllers\KomunitasController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\Api\MidtransWebhookController;
 use App\Http\Controllers\Player\DashboardController as PlayerDashboardController;
 use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -84,7 +85,6 @@ Route::prefix('player')->name('player.')->middleware(['auth', 'role:user'])->gro
     Route::get('/booking/lapangan/{lapangan}', [BookingSearchController::class, 'show'])->name('booking.detail');
     Route::post('/booking/store',       [BookingController::class, 'store'])->name('booking.store');
     Route::get('/booking/{booking}/payment', [BookingController::class, 'payment'])->name('booking.payment');
-    Route::post('/booking/{booking}/upload-bukti', [BookingController::class, 'uploadBukti'])->name('booking.upload-bukti');
 
     // Open Match (FR-E1–E5)
     Route::get('/open-match',           [OpenMatchController::class, 'index'])->name('open-match');
@@ -128,8 +128,6 @@ Route::prefix('owner')->name('owner.')->middleware(['auth', 'role:owner'])->grou
 
     // Verifikasi Booking (FR-D1–D5)
     Route::get('/verify-booking',       [VerifikasiBookingController::class, 'index'])->name('verify-booking');
-    Route::post('/verify-booking/{booking}/approve', [VerifikasiBookingController::class, 'approve'])->name('verify-booking.approve');
-    Route::post('/verify-booking/{booking}/reject',  [VerifikasiBookingController::class, 'reject'])->name('verify-booking.reject');
 
     // Komunitas (akses sama dengan User, §3.5)
     Route::get('/community',            [KomunitasController::class, 'index'])->name('community');
@@ -137,7 +135,7 @@ Route::prefix('owner')->name('owner.')->middleware(['auth', 'role:owner'])->grou
     Route::post('/community/{komunitas}/kirim', [KomunitasController::class, 'kirimPesan'])->name('community.kirim');
 
     // Profil Usaha
-    Route::get('/profile',              fn() => view('owner.profile'))->name('profile');
+    Route::get('/profile',              fn() => view('owner.profile', ['user' => auth()->user()]))->name('profile');
     Route::get('/notifikasi',           [NotifikasiController::class, 'index'])->name('notifikasi');
 });
 
@@ -154,3 +152,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
     Route::get('/notifikasi/unread-count',       [NotifikasiController::class, 'unreadCount'])->name('notifikasi.unread-count');
 });
+
+/* ─── Midtrans Webhook ───────────────────────────────────────── */
+Route::post('/api/midtrans/notification', [MidtransWebhookController::class, 'handle'])->name('midtrans.notification');
